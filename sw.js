@@ -1,5 +1,5 @@
 // Guarda la app para que abra sin conexión. Sube el número al publicar cambios.
-const CACHE = "hucha-v4-4";
+const CACHE = "hucha-v4-5";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener("activate", e => {
@@ -14,7 +14,7 @@ self.addEventListener("fetch", e => {
   if (url.origin !== location.origin && !fonts) return;
   if (req.mode === "navigate" || url.pathname.endsWith(".html")) {
     // la página: primero red (para recibir cambios), si no hay conexión, la guardada
-    e.respondWith(fetch(req).then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put(req, c)); return r; }).catch(() => caches.match(req).then(r => r || caches.match("./"))));
+    e.respondWith(fetch(req, {cache: "no-store"}).then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put(req, c)); return r; }).catch(() => caches.match(req).then(r => r || caches.match("./"))));
     return;
   }
   e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put(req, c)); return r; })));
