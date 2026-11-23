@@ -356,6 +356,27 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .news b{display:block;font-family:var(--f-display);font-size:15.5px}
 .news span{color:var(--muted);font-size:14px}
 .foot{display:flex;justify-content:center;padding-top:4px}
+/* ---- personalización (v3.2) ---- */
+.hello-emoji{display:inline-block;margin-right:10px;font-size:.85em;vertical-align:4px}
+.motto{margin:8px 0 0;color:var(--muted);font-size:15px;font-weight:500;max-width:40ch;overflow-wrap:anywhere}
+.lock-emoji{font-size:40px;line-height:1}
+.aj-sec{display:grid;gap:12px;padding-top:14px;border-top:1px solid var(--line)}
+.aj-sec:first-of-type{border-top:0;padding-top:0}
+.aj-sec h3{font-family:var(--f-body);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.emojis{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+.emojis button{height:44px;border-radius:12px;border:2px solid var(--line);background:var(--surface);font-size:22px;line-height:1;display:grid;place-items:center;padding:0}
+.emojis button.none{font-size:16px;color:var(--muted)}
+.emojis button[aria-pressed="true"]{border-color:var(--vault);background:color-mix(in srgb, var(--vault) 12%, var(--surface))}
+.swr{display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer}
+.swr span{display:grid;gap:2px}
+.swr b{font-weight:600}
+.swr small{color:var(--muted);font-size:13px}
+.tg{appearance:none;-webkit-appearance:none;width:48px;height:28px;border-radius:99px;background:var(--line);position:relative;flex:none;cursor:pointer;margin:0;transition:background .2s}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.tg:checked{background:var(--vault)}
+.tg:checked::after{transform:translateX(20px)}
+.tg:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.themes{gap:8px}
 /* ---- mobile polish (v3.1) ---- */
 html,body{overflow-x:hidden}
 button,.mv,.chip,summary{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -434,7 +455,7 @@ button,.mv,.chip,summary{touch-action:manipulation;-webkit-tap-highlight-color:t
 <body>
 <div class="lock" id="lock" role="dialog" aria-modal="true" aria-labelledby="lock-name">
   <div class="lock-card">
-    <div class="lock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/></svg></div>
+    <div class="lock-ic" id="lock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/></svg></div>
     <div><div class="eyebrow" id="lock-eyebrow">Hucha de</div><h1 class="lock-name" id="lock-name">Tu hucha</h1></div>
     <p class="lock-msg" id="lock-msg">Abriendo tu hucha…</p>
     <form class="lock-form" id="lock-form" novalidate hidden>
@@ -461,7 +482,8 @@ button,.mv,.chip,summary{touch-action:manipulation;-webkit-tap-highlight-color:t
   <header class="top">
     <div>
       <div class="eyebrow" id="today">Tu hucha</div>
-      <h1 class="hello">Hola, <b id="hello-name"></b></h1>
+      <h1 class="hello"><span class="hello-emoji" id="hello-emoji" hidden></span>Hola, <b id="hello-name"></b></h1>
+      <p class="motto" id="motto" hidden></p>
     </div>
     <div class="top-r">
       <div class="status warn" id="status"><i></i><span>Conectando…</span></div>
@@ -504,7 +526,7 @@ button,.mv,.chip,summary{touch-action:manipulation;-webkit-tap-highlight-color:t
     <div class="grid" id="jars"></div>
   </section>
 
-  <section class="sec" aria-labelledby="h-emp">
+  <section class="sec" id="sec-emp" aria-labelledby="h-emp">
     <div class="sec-h">
       <div><h2 id="h-emp">Empresas</h2><p>Lo que cobras en cada sitio donde trabajas.</p></div>
       <button class="link" data-act="empresa-new">+ Nueva empresa</button>
@@ -519,7 +541,7 @@ button,.mv,.chip,summary{touch-action:manipulation;-webkit-tap-highlight-color:t
     </div>
   </section>
 
-  <section class="sec" aria-labelledby="h-gas">
+  <section class="sec" id="sec-gas" aria-labelledby="h-gas">
     <div class="sec-h">
       <div><h2 id="h-gas">¿En qué se va tu dinero?</h2><p>Lo que sacas de tus huchas para gastar, por categoría.</p></div>
       <div class="seg" id="gas-seg" role="group" aria-label="Periodo"><button type="button" data-g="mes" aria-pressed="true">Este mes</button><button type="button" data-g="ano" aria-pressed="false">Este año</button></div>
@@ -940,7 +962,7 @@ function formBackup(){
     if(!pending) return "!Elige primero un archivo de copia.";
     CORE.forEach(c=>S[c]=pending[c].map(r=>({...r})));
     S.reglas = Array.isArray(pending.reglas) ? pending.reglas.map(r=>({...r})) : [];
-    if(pending.perfil && pending.perfil.nombre) savePerfil({nombre:String(pending.perfil.nombre).slice(0,24), tema:THEMES[pending.perfil.tema]?pending.perfil.tema:"azul"});
+    if(pending.perfil && pending.perfil.nombre) savePerfil({...PDEF, ...(perfil||{}), ...pending.perfil, nombre:String(pending.perfil.nombre).slice(0,24), tema:THEMES[pending.perfil.tema]?pending.perfil.tema:"azul"});
     celebReady=false; saveLocal(); render(); celebReady=true;
     return `Copia cargada: ${pending.movs.length} movimientos`;
   }, "", {okLabel:"Cargar esta copia"});
@@ -1333,7 +1355,8 @@ function formAyuda(){
     ${sec(ICON.edit, "Movimientos: corregir, borrar y filtrar", `<p>Todo queda apuntado en <b>Movimientos</b>. <b>Toca cualquier movimiento</b> para corregir el importe, la fecha o lo que necesites.</p><p>Con la papelera lo borras al momento, y durante unos segundos puedes pulsar <b>Deshacer</b>. Si borras un cobro, se borra también lo que repartiste de él.</p><p>Filtra por tipo, por <b>empresa</b> o por <b>mes</b>; arriba de la lista verás el resumen de lo filtrado.</p>`)}
     ${sec(ICON.inc, "Comparar con el mes anterior", `<p>Debajo de <b>Cobrado este mes</b> verás si llevas más (↑) o menos (↓) que el mes pasado, en porcentaje. Ojo: el mes en curso aún no ha terminado.</p>`)}
     ${sec(ICON.eye, "Ocultar importes", `<p>El icono del <b>ojo</b>, arriba, cambia todas las cifras por <b>•••</b>. Útil para enseñar la app sin mostrar cuánto tienes. Vuelve a tocarlo para verlas.</p>`)}
-    ${sec(ICON.help, "Contraseña, copias y otros dispositivos", `<p>La app pide tu contraseña al abrirla y <b>se bloquea sola</b> si la dejas más de 2 minutos en segundo plano. Puedes bloquearla con <b>Bloquear</b> y cambiar nombre, color o contraseña en <b>Ajustes</b>.</p><p>Tus datos se guardan <b>solo en este dispositivo</b>: nadie más los ve, ni siquiera quien te pasó la app. Por eso conviene usar <b>Copia de seguridad → Descargar copia</b> de vez en cuando, y <b>Cargar copia</b> para pasarlos a otro móvil.</p><p>Para tenerla como una app: en iPhone, Safari → Compartir → <b>Añadir a pantalla de inicio</b>. En Android, Chrome → ⋮ → <b>Instalar app</b>.</p>`)}
+    ${sec(ICON.party, "Personaliza tu hucha", `<p>En <b>Ajustes</b> (el icono de los controles, arriba) puedes cambiar tu <b>nombre</b>, elegir un <b>icono</b> que te represente y escribir una <b>frase</b> que salga bajo tu saludo, por ejemplo «Ahorrando para Japón».</p><p>También eliges entre <b>10 colores</b>, el modo <b>claro, oscuro o automático</b>, si las cifras empiezan <b>ocultas</b> al abrir, cuánto tarda en <b>bloquearse</b> sola y qué <b>secciones</b> quieres ver.</p>`)}
+    ${sec(ICON.help, "Contraseña, copias y otros dispositivos", `<p>La app pide tu contraseña al abrirla y <b>se bloquea sola</b> si la dejas un rato en segundo plano (2 minutos, o lo que elijas en Ajustes). Puedes bloquearla con <b>Bloquear</b> y cambiar nombre, color o contraseña en <b>Ajustes</b>.</p><p>Tus datos se guardan <b>solo en este dispositivo</b>: nadie más los ve, ni siquiera quien te pasó la app. Por eso conviene usar <b>Copia de seguridad → Descargar copia</b> de vez en cuando, y <b>Cargar copia</b> para pasarlos a otro móvil.</p><p>Para tenerla como una app: en iPhone, Safari → Compartir → <b>Añadir a pantalla de inicio</b>. En Android, Chrome → ⋮ → <b>Instalar app</b>.</p>`)}
   </div>`;
   openSheet("Cómo funciona tu hucha", "Todo lo que puedes hacer, explicado paso a paso.", body, null, "", {noSubmit:true, wide:true, noFocus:true, closeLabel:"Entendido"});
 }
@@ -1347,14 +1370,15 @@ function showNews(){
     ${it(ICON.rule, "c4", "Reglas de reparto", "Guarda tu 50/30/20 y aplícalo con un toque.")}
     ${it(ICON.inc, "c3", "Facturas pendientes", "Apunta lo que te deben y márcalo al cobrar.")}
     ${it(ICON.tag, "c5", "Categorías de gasto", "Descubre en qué se va tu dinero.")}
+    ${it(ICON.party, "c7", "Hazla tuya", "Icono, frase, 10 colores, modo oscuro y más en Ajustes.")}
     ${it(ICON.eye, "c6", "Y además", "Filtros por empresa y mes, ocultar importes, comparativa mensual y celebraciones.")}
   </ul>`;
   openSheet("Novedades de tu hucha", "Lo nuevo de esta actualización, en un vistazo.", body, null, `<button type="button" class="btn btn-soft" id="news-help">${ICON.help}Cómo funciona</button>`, {noSubmit:true, noFocus:true, closeLabel:"¡Vamos!"});
   $("#news-help").addEventListener("click", ()=>formAyuda());
 }
 function maybeNews(){
-  let seen = false; try{ seen = localStorage.getItem(NEWS_KEY)==="1"; }catch(e){}
-  if(!seen && todayISO() <= NEWS_UNTIL) setTimeout(showNews, 450);
+  // Se muestra cada vez que alguien entra con su contraseña, hasta NEWS_UNTIL incluido.
+  if(todayISO() <= NEWS_UNTIL) setTimeout(showNews, 450);
 }
 function markNewsSeen(){ try{ localStorage.setItem(NEWS_KEY, "1"); }catch(e){} }
 
@@ -1414,37 +1438,71 @@ function saveAccess(a){ try{ localStorage.setItem(ACC_LS, JSON.stringify(a)); }c
 
 /* ---------- perfil ---------- */
 const PERFIL_KEY = "hucha-perfil";
-const THEMES = { azul:"#2232E6", verde:"#0B7A5A", morado:"#6B2FD6", coral:"#D2412E", rosa:"#C2185B", noche:"#1B1E3A" };
-const THEME_NAMES = { azul:"Azul", verde:"Verde", morado:"Morado", coral:"Coral", rosa:"Rosa", noche:"Noche" };
+const THEMES = { azul:"#2232E6", indigo:"#3730A3", morado:"#6B2FD6", rosa:"#C2185B", granate:"#9F1239", coral:"#D2412E", cafe:"#7C4A1E", verde:"#0B7A5A", turquesa:"#0F766E", noche:"#1B1E3A" };
+const THEME_NAMES = { azul:"Azul", indigo:"Índigo", morado:"Morado", rosa:"Rosa", granate:"Granate", coral:"Coral", cafe:"Café", verde:"Verde", turquesa:"Turquesa", noche:"Noche" };
+const EMOJIS = ["🐷","💰","💎","🚀","✈️","🌴","🏠","🚗","🎮","⚽","🎸","🌟","🍀","🐶","🐱","🦊"];
+const PDEF = { tema:"azul", emoji:"", frase:"", modo:"auto", privInicio:false, autoLock:2, ocultar:{} };
+const pget = k => (perfil && perfil[k]!=null) ? perfil[k] : PDEF[k];
+let lockIcDefault = "";
 let perfil = null;
 const slug = n => (String(n||"mi").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "mi");
 function loadPerfil(){ try{ perfil = JSON.parse(localStorage.getItem(PERFIL_KEY)||"null"); }catch(e){ perfil=null; } applyPerfil(); }
 function savePerfil(p){ perfil = p; try{ localStorage.setItem(PERFIL_KEY, JSON.stringify(p)); }catch(e){} applyPerfil(); }
-function applyPerfil(previewTema){
-  const tema = previewTema || (perfil && perfil.tema) || "azul";
-  const c = THEMES[tema] || THEMES.azul;
-  document.documentElement.style.setProperty("--vault", c);
+function applyPerfil(prev){
+  const p = {...PDEF, ...(perfil||{}), ...(prev||{})};
+  const root = document.documentElement;
+  const c = THEMES[p.tema] || THEMES.azul;
+  root.style.setProperty("--vault", c);
   const m = document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute("content", c);
-  const n = perfil && perfil.nombre ? perfil.nombre : "";
+  if(p.modo==="claro") root.dataset.theme="light"; else if(p.modo==="oscuro") root.dataset.theme="dark"; else delete root.dataset.theme;
+  const n = p.nombre || "";
   const h = $("#hello-name"); if(h) h.textContent = n || "de nuevo";
+  const he = $("#hello-emoji"); he.textContent = p.emoji || ""; he.hidden = !p.emoji;
+  const mo = $("#motto"); mo.textContent = p.frase || ""; mo.hidden = !p.frase;
+  const li = $("#lock-ic"); if(!lockIcDefault) lockIcDefault = li.innerHTML;
+  li.innerHTML = p.emoji ? `<span class="lock-emoji">${esc(p.emoji)}</span>` : lockIcDefault;
+  const oc = p.ocultar || {};
+  $("#sec-emp").hidden = !!oc.empresas; $("#sec-gas").hidden = !!oc.gastos;
   document.title = n ? `Hucha de ${n}` : "Mi Hucha";
 }
 function themeButtons(sel){ return Object.keys(THEMES).map(k=>`<button type="button" data-t="${k}" aria-pressed="${k===sel}" aria-label="${THEME_NAMES[k]}" title="${THEME_NAMES[k]}" style="--t:${THEMES[k]}"></button>`).join(""); }
 let lockTema = "azul";
 $("#lock-nombre").addEventListener("input", e=>{ const v=e.target.value.trim(); $("#lock-eyebrow").textContent = v ? "Hucha de" : "Bienvenido a"; $("#lock-name").textContent = v || "tu hucha"; });
-$("#lock-themes").addEventListener("click", e=>{ const b=e.target.closest("button[data-t]"); if(!b) return; lockTema=b.dataset.t; $("#lock-themes").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", String(x===b))); applyPerfil(lockTema); });
+$("#lock-themes").addEventListener("click", e=>{ const b=e.target.closest("button[data-t]"); if(!b) return; lockTema=b.dataset.t; $("#lock-themes").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", String(x===b))); applyPerfil({tema:lockTema}); });
 function formAjustes(welcome){
-  const sel = (perfil && perfil.tema) || "azul";
+  const sel = pget("tema"), emo = pget("emoji"), oc = pget("ocultar")||{};
+  const sw = (name, label, sub, on) => `<label class="swr"><span><b>${label}</b>${sub?`<small>${sub}</small>`:""}</span><input type="checkbox" class="tg" name="${name}" ${on?"checked":""}></label>`;
   const body = `
-    <div class="field"><label for="f-nom">Tu nombre</label><input class="inp" id="f-nom" name="nombre" maxlength="24" value="${esc(perfil&&perfil.nombre||"")}" placeholder="¿Cómo te llamas?" autocomplete="given-name" autofocus></div>
-    <div class="field"><span class="fl">Color de tu hucha</span><div class="themes" id="f-themes">${themeButtons(sel)}</div><input type="hidden" name="tema" value="${sel}"></div>`;
+    <div class="aj-sec"><h3>Tú</h3>
+      <div class="field"><label for="f-nom">Tu nombre</label><input class="inp" id="f-nom" name="nombre" maxlength="24" value="${esc(perfil&&perfil.nombre||"")}" placeholder="¿Cómo te llamas?" autocomplete="given-name" ${welcome?"autofocus":""}></div>
+      <div class="field"><span class="fl">Tu icono</span><div class="emojis" id="f-emojis"><button type="button" data-e="" aria-pressed="${!emo}" aria-label="Sin icono" class="none">—</button>${EMOJIS.map(e=>`<button type="button" data-e="${e}" aria-pressed="${e===emo}">${e}</button>`).join("")}</div><input type="hidden" name="emoji" value="${esc(emo)}"></div>
+      <div class="field"><label for="f-frase">Tu frase (opcional)</label><input class="inp" id="f-frase" name="frase" maxlength="60" value="${esc(pget("frase"))}" placeholder="Ej. Ahorrando para mi viaje a Japón"><span class="hint">Sale debajo de tu saludo, para recordarte para qué ahorras.</span></div>
+    </div>
+    <div class="aj-sec"><h3>Aspecto</h3>
+      <div class="field"><span class="fl">Color de tu hucha</span><div class="themes" id="f-themes">${themeButtons(sel)}</div><input type="hidden" name="tema" value="${sel}"></div>
+      <div class="field"><span class="fl">Modo</span>${segHTML("modo", [{v:"auto",l:"Automático"},{v:"claro",l:"Claro"},{v:"oscuro",l:"Oscuro"}], pget("modo"))}</div>
+    </div>
+    <div class="aj-sec"><h3>Privacidad</h3>
+      ${sw("privInicio", "Ocultar importes al abrir", "Las cifras empiezan como •••. Tócalas con el ojo para verlas.", pget("privInicio"))}
+      <div class="field"><span class="fl">Bloqueo automático</span>${segHTML("autoLock", [{v:"1",l:"1 min"},{v:"2",l:"2 min"},{v:"5",l:"5 min"},{v:"0",l:"Nunca"}], String(pget("autoLock")))}<span class="hint">Tiempo con la app en segundo plano antes de pedir la contraseña otra vez.</span></div>
+    </div>
+    <div class="aj-sec"><h3>Secciones</h3>
+      ${sw("verEmp", "Empresas y cobros por mes", "", !oc.empresas)}
+      ${sw("verGas", "¿En qué se va tu dinero?", "", !oc.gastos)}
+    </div>`;
   const foot = welcome ? "" : `<button type="button" class="btn btn-soft" id="f-pw">Cambiar contraseña</button>`;
-  const f = openSheet(welcome ? "¡Bienvenido!" : "Ajustes", welcome ? "Dinos tu nombre para personalizar tu hucha." : "", body, f=>{
+  const read = f => ({ tema:f.tema.value, emoji:f.emoji.value, frase:f.frase.value.trim(), modo:f.modo.value, privInicio:f.privInicio.checked, autoLock:+f.autoLock.value, ocultar:{empresas:!f.verEmp.checked, gastos:!f.verGas.checked} });
+  const f = openSheet(welcome ? "¡Bienvenido!" : "Ajustes", welcome ? "Dinos tu nombre y deja tu hucha a tu gusto. Puedes cambiarlo cuando quieras." : "Deja tu hucha a tu gusto.", body, f=>{
     const nombre = f.nombre.value.trim(); if(!nombre) return "!Escribe tu nombre.";
-    savePerfil({nombre, tema:f.tema.value}); render();
+    savePerfil({...PDEF, ...(perfil||{}), ...read(f), nombre}); render();
     return welcome ? `¡Hola, ${nombre}!` : "Ajustes guardados";
-  }, foot, {onClose:()=>applyPerfil()});
-  f.querySelector("#f-themes").addEventListener("click", e=>{ const b=e.target.closest("button[data-t]"); if(!b) return; f.querySelectorAll("#f-themes button").forEach(x=>x.setAttribute("aria-pressed", String(x===b))); f.tema.value=b.dataset.t; applyPerfil(b.dataset.t); });
+  }, foot, {onClose:()=>applyPerfil(), noFocus:!welcome});
+  const preview = ()=>applyPerfil({...read(f), nombre:f.nombre.value.trim() || (perfil&&perfil.nombre) || ""});
+  f.querySelector("#f-themes").addEventListener("click", e=>{ const b=e.target.closest("button[data-t]"); if(!b) return; f.querySelectorAll("#f-themes button").forEach(x=>x.setAttribute("aria-pressed", String(x===b))); f.tema.value=b.dataset.t; preview(); });
+  f.querySelector("#f-emojis").addEventListener("click", e=>{ const b=e.target.closest("button[data-e]"); if(!b) return; f.querySelectorAll("#f-emojis button").forEach(x=>x.setAttribute("aria-pressed", String(x===b))); f.emoji.value=b.dataset.e; preview(); });
+  wireSegs(f, ()=>preview());
+  f.addEventListener("input", e=>{ if(e.target.name==="frase"||e.target.name==="nombre") preview(); });
+  f.addEventListener("change", e=>{ if(e.target.classList.contains("tg")) preview(); });
   const pwb = f.querySelector("#f-pw"); if(pwb) pwb.addEventListener("click", ()=>formPassword());
 }
 
@@ -1476,6 +1534,7 @@ function showLock(state, msg){
 }
 function unlock(isNew){
   lockState="open"; fails=0; $("#lock").hidden = true; $("#app").hidden = false; $("#fab").hidden = false;
+  if(pget("privInicio")) priv = true;
   celebReady = false; render(); celebReady = true;
   if(isNew){ markNewsSeen(); return; }
   if(!perfil || !perfil.nombre) setTimeout(()=>formAjustes(true), 200);
@@ -1518,7 +1577,7 @@ $("#lock-reset").addEventListener("click", ()=>{
 $("#lock-retry").addEventListener("click", ()=>initLock());
 document.addEventListener("visibilitychange", ()=>{
   if(document.hidden){ hiddenAt=Date.now(); return; }
-  if(lockState==="open" && access && hiddenAt && Date.now()-hiddenAt>120000) showLock("enter");
+  const mins = +pget("autoLock"); if(lockState==="open" && access && hiddenAt && mins>0 && Date.now()-hiddenAt>mins*60000) showLock("enter");
 });
 function initLock(){
   loadPerfil();
