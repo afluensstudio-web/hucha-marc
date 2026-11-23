@@ -604,6 +604,26 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .hb,.top-r .icon-btn{border-radius:10px}
   .fab{border-radius:16px}
 }
+
+/* ---- estabilidad en móvil (v4.2): sin rebotes, sin saltos, sin zoom ---- */
+html,body{overscroll-behavior:none}
+body{touch-action:manipulation}
+html.noscroll body{position:fixed;left:0;right:0;width:100%;overflow:hidden}
+.sheet{overscroll-behavior:contain;touch-action:pan-y}
+.sheet-bg{touch-action:none}
+.sheet-p{overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;max-width:100%}
+.sheet-p .field,.sheet-p .split,.sheet-p .row2 > *{min-width:0}
+.pick,.seg,.emojis,.themes,.swatches{max-width:100%}
+.lock{flex-direction:column;align-items:center;justify-content:flex-start;touch-action:pan-y}
+.lock-card{margin-block:auto}
+.swatches button[aria-pressed="true"],.themes button[aria-pressed="true"]{transform:none;box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ink)}
+.lock-themes button[aria-pressed="true"]{transform:none;box-shadow:0 0 0 2px var(--vault),0 0 0 4px #fff}
+.btn:active,.icon-btn:active,.chip:active{transform:none;filter:brightness(.96)}
+input,select,textarea{font-size:max(16px,1em)}
+.split-r .inp,.pct .inp{font-size:16px}
+.tip{max-width:calc(100% - 8px)}
+.chart{overflow:hidden}
+.mv-t,.mv-s,.emp-name,.jar-top h3,.plan span{overflow-wrap:anywhere;min-width:0}
 </style>
 </head>
 <body>
@@ -1149,9 +1169,14 @@ function toast(msg, action, ms){
   toastT=setTimeout(()=>r.innerHTML="", ms || (action ? 6000 : 2600));
 }
 let onSheetClose = null;
-function closeSheet(){ $("#sheet-root").innerHTML=""; document.removeEventListener("keydown", escClose); const cb=onSheetClose; onSheetClose=null; if(cb) cb(); }
+function closeSheet(){ unlockScroll(); $("#sheet-root").innerHTML=""; document.removeEventListener("keydown", escClose); const cb=onSheetClose; onSheetClose=null; if(cb) cb(); }
 function escClose(e){ if(e.key==="Escape") closeSheet(); }
+let FINE = false; try{ FINE = matchMedia("(hover:hover) and (pointer:fine)").matches; }catch(e){}
+let scrollLockY = null;
+function lockScroll(){ if(scrollLockY!==null) return; scrollLockY = window.scrollY; document.body.style.top = (-scrollLockY)+"px"; document.documentElement.classList.add("noscroll"); }
+function unlockScroll(){ if(scrollLockY===null) return; const y = scrollLockY; scrollLockY = null; document.documentElement.classList.remove("noscroll"); document.body.style.top = ""; window.scrollTo(0, y); }
 function openSheet(title, sub, body, onSubmit, extraFoot="", opts={}){
+  if(!FINE) body = String(body).replace(/\sautofocus(?=[\s>])/g, "");
   if($("#sheet-root").innerHTML){ const cb=onSheetClose; onSheetClose=null; $("#sheet-root").innerHTML=""; if(cb) cb(); }
   const foot = opts.noSubmit
     ? `${extraFoot}<span class="grow"></span><button type="button" class="btn btn-ink" data-close>${esc(opts.closeLabel||"Cerrar")}</button>`
@@ -1164,6 +1189,7 @@ function openSheet(title, sub, body, onSubmit, extraFoot="", opts={}){
       <div class="sheet-f">${foot}</div>
     </form></div>`;
   onSheetClose = opts.onClose || null;
+  lockScroll();
   const f = $("#sheet-form");
   f.addEventListener("submit", async ev=>{
     ev.preventDefault(); if(opts.noSubmit) return;
@@ -1174,7 +1200,7 @@ function openSheet(title, sub, body, onSubmit, extraFoot="", opts={}){
   });
   $("#sheet-root").querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click", closeSheet));
   document.addEventListener("keydown", escClose);
-  if(!opts.noFocus) setTimeout(()=>{ const first=f.querySelector("[autofocus]")||f.querySelector("input:not([type=hidden])"); first && first.focus(); }, 30);
+  if(!opts.noFocus && FINE) setTimeout(()=>{ const first=f.querySelector("[autofocus]")||f.querySelector("input:not([type=hidden])"); first && first.focus(); }, 30);
   return f;
 }
 function pickerHTML(name, items, selected){
@@ -1684,7 +1710,7 @@ function showLock(state, msg){
     enter:"Escribe tu contraseña para entrar.",
     error:"No se han podido cargar tus datos."
   })[state];
-  if(!form.hidden) setTimeout(()=>(isNew && !$("#lock-nombre").value ? $("#lock-nombre") : pw).focus(), 30);
+  if(!form.hidden && FINE) setTimeout(()=>(isNew && !$("#lock-nombre").value ? $("#lock-nombre") : pw).focus(), 30);
 }
 function unlock(isNew){
   lockState="open"; fails=0; $("#lock").hidden = true; $("#app").hidden = false; $("#fab").hidden = false;
