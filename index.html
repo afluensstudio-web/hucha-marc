@@ -356,8 +356,68 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .news b{display:block;font-family:var(--f-display);font-size:15.5px}
 .news span{color:var(--muted);font-size:14px}
 .foot{display:flex;justify-content:center;padding-top:4px}
-.sm-only{display:none}
-@media (max-width:520px){ .lg-only{display:none} .sm-only{display:inline} .top-r{gap:6px} .top-r .status{flex-basis:100%} }
+/* ---- mobile polish (v3.1) ---- */
+html,body{overflow-x:hidden}
+button,.mv,.chip,summary{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.hb{padding:8px 14px;font-size:13px}
+.hb svg{width:15px;height:15px}
+.lock{overflow-x:hidden;overscroll-behavior:contain}
+.lock::before,.lock::after{position:fixed}
+.fab{transition:transform .25s ease, opacity .25s ease}
+.fab.off{transform:translateY(160%);opacity:0;pointer-events:none}
+@media (pointer:coarse){ .sel{font-size:16px} }
+@media (max-width:560px){
+  .wrap{gap:28px;padding-block:14px 110px}
+  .top{align-items:flex-start;gap:10px}
+  .top-r{gap:6px;width:100%}
+  .top-r .status{flex-basis:100%;margin-bottom:2px}
+  .hb{width:40px;height:40px;padding:0;justify-content:center;border-radius:50%}
+  .hb .hb-t{display:none}
+  .top-r .icon-btn{width:40px;height:40px}
+  .news-btn{height:40px;padding:0 14px}
+  .vault{padding:22px 18px;gap:20px;border-radius:24px}
+  .big{font-size:clamp(46px,15vw,64px)}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:16px 14px}
+  .stat{min-width:0}
+  .stat .v{font-size:20px;overflow-wrap:anywhere}
+  .stat.owe{margin:0;padding:10px 12px}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .actions .btn{justify-content:center;padding:12px 8px;font-size:14px;text-align:center}
+  .actions .btn-sun{grid-column:1/-1;padding:14px}
+  .sec-h h2{font-size:24px}
+  .panel{padding:14px}
+  .emp{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"b i" "b r";gap:6px 12px;align-items:start;padding:10px 6px}
+  .emp-badge{grid-area:b}
+  .emp > div:nth-child(2){grid-area:i}
+  .emp-right{grid-area:r;justify-content:space-between;width:100%}
+  .emp-total{text-align:left;font-size:17px}
+  .mv{gap:4px 10px;padding:12px 12px 12px 14px}
+  .mv-a{font-size:16px}
+  .mv-act .del{width:32px;height:32px}
+  .mv.pendrow{grid-template-columns:auto minmax(0,1fr) auto}
+  .mv.pendrow .mv-act{grid-column:2/4;grid-row:2;justify-content:flex-end}
+  .mday{padding:8px 14px 5px}
+  .filters{gap:6px}
+  .filters .sel{flex:1 1 140px}
+  .msum .link{margin-left:0}
+  .jar-amt{font-size:30px}
+  .grs{grid-template-columns:1fr}
+  .fab{width:58px;height:58px;padding:0;justify-content:center;border-radius:50%;right:max(18px, env(safe-area-inset-right, 0px));bottom:calc(18px + env(safe-area-inset-bottom, 0px))}
+  .fab svg{width:24px;height:24px}
+  .fab .fab-t{display:none}
+  .sheet-p{gap:14px}
+  .sheet-h h2{font-size:23px}
+  .sheet-f .btn{flex:1 1 auto;justify-content:center}
+  .sheet-f .grow{display:none}
+  .split-r{grid-template-columns:auto minmax(0,1fr) 104px}
+  .money .inp{font-size:28px}
+  .celeb-card{padding:24px 20px}
+}
+@media (max-width:340px){
+  .stats{grid-template-columns:1fr}
+  .actions{grid-template-columns:1fr}
+  .seg button{padding:8px 11px;font-size:13px}
+}
 .confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:80}
 .celeb{position:fixed;inset:0;z-index:79;display:grid;place-items:center;padding:24px;background:rgba(10,12,30,.35);animation:fadeIn .2s ease}
 .celeb-card{background:var(--surface);border-radius:28px;padding:28px 26px;text-align:center;width:min(340px,100%);box-shadow:0 30px 80px -20px rgba(0,0,0,.5);animation:pop .42s cubic-bezier(.2,1.4,.4,1)}
@@ -408,9 +468,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       <button class="btn news-btn" data-act="novedades" id="btn-news" hidden>Novedades</button>
       <button class="icon-btn" data-act="privacy" id="btn-eye" aria-label="Ocultar importes" aria-pressed="false"></button>
       <button class="icon-btn" data-act="ayuda" aria-label="Cómo funciona" title="Cómo funciona"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.7"/><path d="M12 17h.01"/></svg></button>
-      <button class="btn btn-soft" data-act="backup" style="padding:8px 14px;font-size:13px" aria-label="Copia de seguridad"><span class="lg-only">Copia de seguridad</span><span class="sm-only">Copia</span></button>
-      <button class="btn btn-soft" data-act="ajustes" style="padding:8px 14px;font-size:13px">Ajustes</button>
-      <button class="btn btn-ink" data-act="lock" style="padding:8px 14px;font-size:13px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>Bloquear</button>
+      <button class="btn btn-soft hb" data-act="backup" aria-label="Copia de seguridad" title="Copia de seguridad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/></svg><span class="hb-t">Copia de seguridad</span></button>
+      <button class="btn btn-soft hb" data-act="ajustes" aria-label="Ajustes" title="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg><span class="hb-t">Ajustes</span></button>
+      <button class="btn btn-ink hb" data-act="lock" aria-label="Bloquear" title="Bloquear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg><span class="hb-t">Bloquear</span></button>
     </div>
   </header>
 
@@ -489,7 +549,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <footer class="foot"><button class="link" data-act="ayuda">¿Cómo funciona la app? Ver la guía</button></footer>
 </div>
 
-<button class="btn btn-sun fab" id="fab" hidden data-act="cobro" aria-label="Añadir cobro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Cobro</button>
+<button class="btn btn-sun fab" id="fab" hidden data-act="cobro" aria-label="Añadir cobro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span class="fab-t">Cobro</span></button>
 <div id="sheet-root"></div>
 <div id="toast-root"></div>
 <div id="celeb-root"></div>
@@ -831,7 +891,7 @@ function renderMoves(){
   for(const m of shown){
     if(m.fecha!==day){ day=m.fecha; html += `<div class="mday">${esc(fmtDay(m.fecha))}</div>`; }
     const v = movView(m);
-    html += `<div class="mv" style="--c:${v.c}" data-act="mov-edit" data-id="${esc(m.id)}" role="button" tabindex="0" aria-label="Editar: ${esc(v.t)}">
+    html += `<div class="mv${isPend(m)?" pendrow":""}" style="--c:${v.c}" data-act="mov-edit" data-id="${esc(m.id)}" role="button" tabindex="0" aria-label="Editar: ${esc(v.t)}">
       <div class="mv-ic">${v.ic}</div>
       <div style="min-width:0"><div class="mv-t">${esc(v.t)}${v.pill?` <span class="pill">${v.pill}</span>`:""}</div>${v.s?`<div class="mv-s">${v.cat?`<i class="cat-dot" style="background:${color(v.cat.color)}"></i>`:""}${esc(v.s)}</div>`:""}</div>
       <div class="mv-a num ${v.cls}">${esc(v.a)}</div>
@@ -1478,6 +1538,9 @@ function formPassword(){
     return "Contraseña cambiada";
   });
 }
+
+/* ---------- FAB: hidden while the main actions are on screen ---------- */
+try{ const io = new IntersectionObserver(es=>{ $("#fab").classList.toggle("off", es[0].isIntersecting); }, {threshold:0.2}); io.observe($(".vault .actions")); }catch(e){}
 
 /* ---------- boot ---------- */
 loadLocal();
