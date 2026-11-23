@@ -16,7 +16,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: one column of stacked bands — cobalt "vault" hero with the totals, then huchas grid, empresas (list + chart), movimientos. */
 :root{
@@ -450,6 +450,160 @@ button,.mv,.chip,summary{touch-action:manipulation;-webkit-tap-highlight-color:t
 @keyframes pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion: reduce){ *{animation:none!important;transition:none!important} }
+
+/* =========================================================
+   Diseño profesional (v4): tipografía Geist, neutros sobrios,
+   radios contenidos, tarjetas con borde fino y acento de color.
+   ========================================================= */
+:root{
+  --f-display:"Geist", "SF Pro Display", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-body:"Geist", "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --bg:#F4F5F8; --surface:#FFFFFF; --surface-2:#F3F4F7; --ink:#0E1222; --muted:#596074; --faint:#8A90A3; --line:#E3E6ED;
+  --sun:#F2B33D; --sun-ink:#231700;
+  --r-lg:20px; --r-md:14px; --r-sm:10px;
+  --shadow:0 1px 2px rgba(14,18,34,.04), 0 6px 16px -10px rgba(14,18,34,.12);
+  --focus:color-mix(in srgb, var(--vault) 55%, #fff);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0A0C13; --surface:#121520; --surface-2:#181C29; --ink:#E8EBF4; --muted:#9AA1B6; --faint:#6E7590; --line:#232838;
+  --sun:#F2B33D; --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.6);
+}}
+:root[data-theme="dark"]{
+  --bg:#0A0C13; --surface:#121520; --surface-2:#181C29; --ink:#E8EBF4; --muted:#9AA1B6; --faint:#6E7590; --line:#232838;
+  --sun:#F2B33D; --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.6);
+}
+body{font-size:15px;letter-spacing:-.005em}
+h1,h2,h3{font-weight:600;letter-spacing:-.025em}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.eyebrow{font-size:11.5px;font-weight:500;letter-spacing:.08em;color:var(--faint)}
+/* cabecera */
+.hello{font-size:clamp(28px,5vw,40px);font-weight:600;letter-spacing:-.03em;line-height:1.1;color:var(--muted)}
+.hello b, :root[data-theme="dark"] .hello b{color:var(--ink);font-weight:600;text-transform:none}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .hello b{color:var(--ink)} }
+.hello-emoji{font-size:.8em;vertical-align:3px}
+.motto{font-size:14.5px;margin-top:6px}
+.status{font-size:12.5px}
+/* bloque principal */
+.vault{border-radius:var(--r-lg);gap:24px;
+  background:linear-gradient(140deg, color-mix(in srgb, var(--vault) 92%, #fff) 0%, var(--vault) 45%, color-mix(in srgb, var(--vault) 72%, #000) 100%);
+  box-shadow:0 18px 40px -24px color-mix(in srgb, var(--vault) 70%, transparent)}
+.vault::after{right:-140px;top:-160px;width:420px;height:420px;border:0;background:radial-gradient(circle, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 62%)}
+.vault .lbl{font-size:11px;font-weight:500;letter-spacing:.09em;color:var(--vault-soft)}
+.big{font-weight:600;letter-spacing:-.045em;font-size:clamp(44px,9vw,76px)}
+.big small{font-weight:500;opacity:.7}
+.stat .v{font-weight:600;letter-spacing:-.02em;font-size:22px}
+.stat.pend .v{color:#FFD487}
+.stat .delta{font-weight:600}
+.stat.owe{border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14)}
+.bar{height:10px;border-radius:5px;background:rgba(255,255,255,.14)}
+.legend{font-size:12.5px}
+.legend i{width:8px;height:8px;border-radius:2px;box-shadow:none}
+.legend b{font-weight:600}
+/* botones */
+.btn{border-radius:12px;font-weight:600;font-size:14.5px;padding:11px 18px;letter-spacing:-.005em;transition:background .15s, filter .15s, box-shadow .15s}
+.btn:hover{transform:none;filter:brightness(1.06)}
+.btn-sun{background:var(--vault);color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.vault .btn-sun,.lock .btn-sun{background:#fff;color:color-mix(in srgb, var(--vault) 85%, #000);box-shadow:0 6px 16px -8px rgba(0,0,0,.35)}
+.btn-ghost-v{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)}
+.btn-ink{background:var(--ink);color:var(--bg)}
+.btn-soft{background:var(--surface);border:1px solid var(--line)}
+.btn-soft:hover{background:var(--surface-2);filter:none}
+.news-btn{background:color-mix(in srgb, var(--vault) 12%, var(--surface));color:var(--vault);border:1px solid color-mix(in srgb, var(--vault) 25%, transparent);border-radius:10px}
+:root[data-theme="dark"] .news-btn{color:#C4CCFF}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .news-btn{color:#C4CCFF} }
+.icon-btn{background:var(--surface);border:1px solid var(--line);color:var(--muted);border-radius:10px}
+.icon-btn.add{background:color-mix(in srgb, var(--vault) 10%, var(--surface));color:var(--vault);border-color:color-mix(in srgb, var(--vault) 22%, transparent)}
+:root[data-theme="dark"] .icon-btn.add{color:#C4CCFF}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .icon-btn.add{color:#C4CCFF} }
+.icon-btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.hb{border-radius:10px}
+.link{font-weight:600}
+:root[data-theme="dark"] .link{color:#AEB9FF}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .link{color:#AEB9FF} }
+.fab{background:var(--vault);color:#fff;box-shadow:0 10px 24px -8px color-mix(in srgb, var(--vault) 70%, transparent)}
+/* secciones y tarjetas */
+.sec-h h2{font-size:22px;font-weight:600}
+.sec-h p{font-size:13.5px}
+.panel,.moves,.jar{box-shadow:var(--shadow);border:1px solid var(--line)}
+.jar{border-top:3px solid var(--c)}
+.jar-top{background:none;color:var(--ink);padding:16px 16px 0 18px;align-items:center}
+.jar-top h3{font-size:15.5px;font-weight:600;letter-spacing:-.01em;flex:1}
+.jar-dot{width:9px;height:9px;border-radius:3px;background:var(--c);flex:none}
+.jar-top .edit{background:transparent;color:var(--faint);width:30px;height:30px;border-radius:8px}
+.jar-top .edit:hover{background:var(--surface-2);color:var(--ink)}
+.jar-body{padding:10px 18px 18px;gap:12px}
+.jar-amt{font-weight:600;font-size:30px;letter-spacing:-.035em}
+.prog{height:6px;border:0;background:var(--surface-2)}
+.prog i{background:var(--surface);opacity:1;width:2px}
+.prog-l{font-size:12.5px}
+.plan{border-radius:10px;background:var(--surface-2);border:1px solid var(--line);font-size:13.5px}
+.plan.done{background:color-mix(in srgb, var(--c) 12%, var(--surface));color:var(--ink);border-color:color-mix(in srgb, var(--c) 30%, transparent)}
+.plan.done svg{color:var(--c)}
+.jar-btns .btn{padding:9px 12px;font-size:13.5px}
+.jar-new{border:1.5px dashed var(--line);font-weight:600;min-height:180px}
+.jar-new .plus{width:40px;height:40px;border-radius:12px;font-size:22px;box-shadow:none;border:1px solid var(--line)}
+.emp{border-radius:10px}
+.emp-badge{width:40px;height:40px;border-radius:10px;font-weight:600;font-size:16px}
+.emp-name{font-weight:600;font-size:15px}
+.emp-total{font-weight:600;font-size:17px}
+.chip{border-radius:8px;font-weight:500;padding:7px 12px}
+.sel{border-radius:8px;font-weight:500}
+.seg{border-radius:10px}
+.seg button{border-radius:8px;font-weight:500}
+.msum{border-radius:10px}
+.mv-ic{width:36px;height:36px;border-radius:10px}
+.mv-t{font-weight:500}
+.mv-a{font-weight:600;font-size:16px}
+.mday{font-weight:500;letter-spacing:.06em}
+.pill{border-radius:5px;font-weight:600}
+.gas-total{font-weight:600;font-size:28px}
+.gbar{height:10px;border-radius:5px}
+.gr b{font-weight:600}
+.rule{border-radius:8px;border-width:1px;font-weight:600}
+.split{border-radius:12px}
+.mini{border-radius:7px}
+.money .inp{font-weight:600;letter-spacing:-.02em}
+.inp{border-radius:10px;border-width:1px}
+.pick button{border-width:1.5px;font-weight:500}
+.swatches button,.themes button{border-radius:10px}
+.emojis button{border-radius:10px;border-width:1.5px}
+.toast{border-radius:12px;font-weight:500}
+/* hojas */
+.sheet-p{border-radius:20px}
+.sheet-h h2{font-size:21px;font-weight:600}
+.hlp{border-radius:12px}
+.hlp summary{font-weight:600;font-size:15px}
+.hic,.news .nic{border-radius:9px}
+.news b{font-weight:600;font-size:15px}
+.aj-sec h3{font-weight:600}
+@media (max-width:600px){ .sheet-p{border-radius:20px 20px 0 0} }
+/* pantalla de acceso */
+.lock{background:linear-gradient(160deg, color-mix(in srgb, var(--vault) 90%, #fff) 0%, var(--vault) 40%, color-mix(in srgb, var(--vault) 65%, #000) 100%)}
+.lock::before{border-width:1px;border-color:rgba(255,255,255,.12);width:520px;height:520px;right:-200px;top:-200px}
+.lock::after{border-width:1px;border-color:rgba(255,255,255,.08);width:380px;height:380px;left:-160px;bottom:-140px}
+.lock-ic{width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.22);box-shadow:none}
+.lock-ic svg{width:28px;height:28px}
+.lock-emoji{font-size:32px}
+.lock-name{font-size:clamp(36px,10vw,52px);font-weight:600;letter-spacing:-.04em;text-transform:none}
+.lock-inp{border-radius:12px;border-width:1px;font-size:18px}
+.lock-err{color:#FFD487}
+.lock-themes button{border-radius:10px;border-width:2px}
+.lock-themes button[aria-pressed="true"]{border-color:#fff}
+/* celebración */
+.celeb-card{border-radius:20px}
+.celeb h3{font-size:22px;font-weight:600}
+.celeb-ring b{font-weight:600}
+@media (max-width:560px){
+  .top-r .hb,.top-r .icon-btn{padding:0;width:38px;height:38px}
+  .top-r{gap:5px}
+  .news-btn{height:38px;padding:0 10px;font-size:12.5px}
+  .hello{font-size:28px}
+  .big{font-size:clamp(42px,13vw,58px)}
+  .stat .v{font-size:19px}
+  .sec-h h2{font-size:21px}
+  .hb,.top-r .icon-btn{border-radius:10px}
+  .fab{border-radius:16px}
+}
 </style>
 </head>
 <body>
@@ -749,7 +903,7 @@ function render(){
   $("#jars").innerHTML = huchas.map(h=>{
     const v = k.jar[h.id]||0;
     return `<article class="jar" style="--c:${color(h.color)}">
-      <div class="jar-top"><h3>${esc(h.nombre)}</h3><button class="edit" data-act="hucha-edit" data-id="${esc(h.id)}" aria-label="Editar ${esc(h.nombre)}">${ICON.edit}</button></div>
+      <div class="jar-top"><span class="jar-dot"></span><h3>${esc(h.nombre)}</h3><button class="edit" data-act="hucha-edit" data-id="${esc(h.id)}" aria-label="Editar ${esc(h.nombre)}">${ICON.edit}</button></div>
       <div class="jar-body">
         <div class="jar-amt num">${esc(fmt(v))}</div>
         ${goalHTML(h, v)}
