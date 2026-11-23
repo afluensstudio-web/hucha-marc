@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Hucha de Marc</title>
-<meta name="description" content="App personal de ahorro de Marc.">
+<title>Mi Hucha</title>
+<meta name="description" content="Tu app personal de ahorro: cobros por empresa y huchas.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#2232E6">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -256,6 +256,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .lock-link{background:none;border:0;color:var(--vault-soft);font-size:14px;text-decoration:underline;text-underline-offset:3px;padding:6px}
 .lock-help{font-size:14px;color:var(--vault-soft);background:rgba(255,255,255,.1);border-radius:14px;padding:12px 14px;margin:0}
 .top-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hello b,.lock-name{text-transform:uppercase;overflow-wrap:anywhere}
+.lock-profile{display:grid;gap:10px;margin-bottom:6px}
+.lock-themes{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.lock-themes button{width:38px;height:38px;border-radius:12px;background:var(--t);border:3px solid rgba(255,255,255,.55);box-shadow:0 4px 12px -4px rgba(0,0,0,.4)}
+.lock-themes button[aria-pressed="true"]{border-color:var(--sun);transform:scale(1.12)}
+.lock-lbl{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--vault-soft)}
+.themes{display:flex;flex-wrap:wrap;gap:10px}
+.themes button{width:44px;height:44px;border-radius:14px;background:var(--t);border:3px solid transparent}
+.themes button[aria-pressed="true"]{border-color:var(--ink);transform:scale(1.08)}
 @media (prefers-reduced-motion: reduce){ *{animation:none!important;transition:none!important} }
 </style>
 </head>
@@ -263,9 +272,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <div class="lock" id="lock" role="dialog" aria-modal="true" aria-labelledby="lock-name">
   <div class="lock-card">
     <div class="lock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/></svg></div>
-    <div><div class="eyebrow">Hucha de</div><h1 class="lock-name" id="lock-name">MARC</h1></div>
+    <div><div class="eyebrow" id="lock-eyebrow">Hucha de</div><h1 class="lock-name" id="lock-name">Tu hucha</h1></div>
     <p class="lock-msg" id="lock-msg">Abriendo tu hucha…</p>
     <form class="lock-form" id="lock-form" novalidate hidden>
+      <div class="lock-profile" id="lock-profile" hidden>
+        <label class="sr" for="lock-nombre">Tu nombre</label>
+        <input class="inp lock-inp" id="lock-nombre" maxlength="24" placeholder="¿Cómo te llamas?" autocomplete="given-name" style="letter-spacing:0">
+        <div class="lock-lbl">Elige tu color</div>
+        <div class="lock-themes" id="lock-themes" role="group" aria-label="Color de tu hucha"></div>
+      </div>
       <label class="sr" for="lock-pw">Contraseña</label>
       <input class="inp lock-inp" type="password" id="lock-pw" autocomplete="current-password" placeholder="Contraseña">
       <label class="sr" for="lock-pw2">Repite la contraseña</label>
@@ -283,12 +298,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <header class="top">
     <div>
       <div class="eyebrow" id="today">Tu hucha</div>
-      <h1 class="hello">Hola, <b>MARC</b></h1>
+      <h1 class="hello">Hola, <b id="hello-name"></b></h1>
     </div>
     <div class="top-r">
       <div class="status warn" id="status"><i></i><span>Conectando…</span></div>
       <button class="btn btn-soft" data-act="backup" style="padding:8px 14px;font-size:13px">Copia de seguridad</button>
-      <button class="btn btn-soft" data-act="pw-change" style="padding:8px 14px;font-size:13px">Contraseña</button>
+      <button class="btn btn-soft" data-act="ajustes" style="padding:8px 14px;font-size:13px">Ajustes</button>
       <button class="btn btn-ink" data-act="lock" style="padding:8px 14px;font-size:13px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>Bloquear</button>
     </div>
   </header>
@@ -573,7 +588,7 @@ function loadLocal(){
     localStorage.setItem(SEED_KEY,"1");
   }catch(e){}
 }
-function backupData(){ return {app:"hucha-marc", version:1, exportado:todayISO(), empresas:S.empresas, huchas:S.huchas, movs:S.movs}; }
+function backupData(){ return {app:"hucha-marc", version:1, exportado:todayISO(), perfil, empresas:S.empresas, huchas:S.huchas, movs:S.movs}; }
 function validBackup(d){ return d && typeof d==="object" && COLS.every(c=>Array.isArray(d[c])) && COLS.every(c=>d[c].every(r=>r && typeof r.id==="string")); }
 function formBackup(){
   const body = `
@@ -585,6 +600,7 @@ function formBackup(){
   const f = openSheet("Copia de seguridad", "", body, async()=>{
     if(!pending) return "!Elige primero un archivo de copia.";
     COLS.forEach(c=>S[c]=pending[c].map(r=>({...r})));
+    if(pending.perfil && pending.perfil.nombre) savePerfil({nombre:String(pending.perfil.nombre).slice(0,24), tema:THEMES[pending.perfil.tema]?pending.perfil.tema:"azul"});
     saveLocal(); render();
     return `Copia cargada: ${pending.movs.length} movimientos`;
   });
@@ -592,7 +608,7 @@ function formBackup(){
   $("#sh-ok").textContent = "Cargar esta copia";
   $("#bk-down").addEventListener("click", ()=>{
     const blob = new Blob([JSON.stringify(backupData(), null, 1)], {type:"application/json"});
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `copia-hucha-marc-${todayISO()}.json`;
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `copia-hucha-${slug(perfil&&perfil.nombre)}-${todayISO()}.json`;
     document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
     toast("Copia descargada");
   });
@@ -603,7 +619,7 @@ function formBackup(){
     r.onload = ()=>{
       try{ const d = JSON.parse(r.result); if(!validBackup(d)) throw 0; pending = d;
         $("#bk-preview").innerHTML = `<div class="split"><b>${esc(d.empresas.length)} empresas · ${esc(d.huchas.length)} huchas · ${esc(d.movs.length)} movimientos</b><span class="hint">Copia del ${esc(d.exportado||"día desconocido")}. Al cargarla se sustituye lo que hay ahora en este dispositivo.</span></div>`;
-      }catch(_){ $("#sh-err").textContent = "Ese archivo no es una copia de la Hucha de Marc."; }
+      }catch(_){ $("#sh-err").textContent = "Ese archivo no es una copia de seguridad de esta app."; }
     };
     r.readAsText(file);
   });
@@ -617,7 +633,7 @@ async function del(col, id){
   if(db){ await db.collection(col).doc(id).delete(); }
   else { S[col]=S[col].filter(x=>x.id!==id); saveLocal(); render(); }
 }
-function fail(e){ const code = e && e.code; toast(code==="quota_exceeded" ? "No queda espacio para más datos. Borra movimientos antiguos." : code==="invalid_argument" ? "Solo Marc puede guardar cambios en esta hucha." : "No se ha podido guardar. Prueba otra vez."); }
+function fail(e){ const code = e && e.code; toast(code==="quota_exceeded" ? "No queda espacio para más datos. Borra movimientos antiguos." : code==="invalid_argument" ? "No tienes permiso para guardar cambios aquí." : "No se ha podido guardar. Prueba otra vez."); }
 
 /* ---------- ui helpers ---------- */
 let toastT;
@@ -794,6 +810,7 @@ document.addEventListener("click", async e=>{
     case "more": showAll=true; render(); break;
     case "lock": showLock("enter"); break;
     case "pw-change": formPassword(); break;
+    case "ajustes": formAjustes(false); break;
     case "backup": formBackup(); break;
     case "del-ask": confirmId = confirmId===id ? null : id; render(); break;
     case "del-no": confirmId=null; render(); break;
@@ -828,6 +845,43 @@ async function saveAccess(a){
   else { try{ localStorage.setItem(ACC_LS, JSON.stringify(a)); }catch(e){} }
   access = a;
 }
+/* ---------- perfil ---------- */
+const PERFIL_KEY = "hucha-perfil";
+const THEMES = { azul:"#2232E6", verde:"#0B7A5A", morado:"#6B2FD6", coral:"#D2412E", rosa:"#C2185B", noche:"#1B1E3A" };
+const THEME_NAMES = { azul:"Azul", verde:"Verde", morado:"Morado", coral:"Coral", rosa:"Rosa", noche:"Noche" };
+let perfil = null;
+const slug = n => (String(n||"mi").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "mi");
+function loadPerfil(){ try{ perfil = JSON.parse(localStorage.getItem(PERFIL_KEY)||"null"); }catch(e){ perfil=null; } applyPerfil(); }
+function savePerfil(p){ perfil = p; try{ localStorage.setItem(PERFIL_KEY, JSON.stringify(p)); }catch(e){} applyPerfil(); }
+function applyPerfil(previewTema){
+  const tema = previewTema || (perfil && perfil.tema) || "azul";
+  const c = THEMES[tema] || THEMES.azul;
+  document.documentElement.style.setProperty("--vault", c);
+  const m = document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute("content", c);
+  const n = perfil && perfil.nombre ? perfil.nombre : "";
+  const h = $("#hello-name"); if(h) h.textContent = n || "de nuevo";
+  document.title = n ? `Hucha de ${n}` : "Mi Hucha";
+}
+function themeButtons(sel){ return Object.keys(THEMES).map(k=>`<button type="button" data-t="${k}" aria-pressed="${k===sel}" aria-label="${THEME_NAMES[k]}" title="${THEME_NAMES[k]}" style="--t:${THEMES[k]}"></button>`).join(""); }
+let lockTema = "azul";
+$("#lock-nombre").addEventListener("input", e=>{ const v=e.target.value.trim(); $("#lock-eyebrow").textContent = v ? "Hucha de" : "Bienvenido a"; $("#lock-name").textContent = v || "tu hucha"; });
+$("#lock-themes").addEventListener("click", e=>{ const b=e.target.closest("button[data-t]"); if(!b) return; lockTema=b.dataset.t; $("#lock-themes").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", String(x===b))); applyPerfil(lockTema); });
+function formAjustes(welcome){
+  const sel = (perfil && perfil.tema) || "azul";
+  const body = `
+    <div class="field"><label for="f-nom">Tu nombre</label><input class="inp" id="f-nom" name="nombre" maxlength="24" value="${esc(perfil&&perfil.nombre||"")}" placeholder="¿Cómo te llamas?" autocomplete="given-name" autofocus></div>
+    <div class="field"><span class="fl">Color de tu hucha</span><div class="themes" id="f-themes">${themeButtons(sel)}</div><input type="hidden" name="tema" value="${sel}"></div>`;
+  const foot = welcome ? "" : `<button type="button" class="btn btn-soft" id="f-pw">Cambiar contraseña</button>`;
+  const f = openSheet(welcome ? "¡Bienvenido!" : "Ajustes", welcome ? "Dinos tu nombre para personalizar tu hucha." : "", body, async f=>{
+    const nombre = f.nombre.value.trim(); if(!nombre) return "!Escribe tu nombre.";
+    savePerfil({nombre, tema:f.tema.value}); render();
+    return welcome ? `¡Hola, ${nombre}!` : "Ajustes guardados";
+  }, foot);
+  f.querySelector("#f-themes").addEventListener("click", e=>{ const b=e.target.closest("button[data-t]"); if(!b) return; f.querySelectorAll("#f-themes button").forEach(x=>x.setAttribute("aria-pressed", String(x===b))); f.tema.value=b.dataset.t; applyPerfil(b.dataset.t); });
+  const pwb = f.querySelector("#f-pw"); if(pwb) pwb.addEventListener("click", ()=>{ applyPerfil(); setTimeout(formPassword, 30); });
+  f.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click", ()=>applyPerfil()));
+}
+
 function showLock(state, msg){
   lockState = state; closeSheet();
   $("#lock").hidden = false; $("#app").hidden = true; $("#fab").hidden = true;
@@ -839,25 +893,33 @@ function showLock(state, msg){
   pw.value = ""; pw2.value = "";
   pw2.hidden = state!=="create";
   pw.autocomplete = state==="create" ? "new-password" : "current-password";
-  $("#lock-ok").textContent = state==="create" ? "Crear contraseña y entrar" : "Entrar";
+  const isNew = state==="create";
+  $("#lock-profile").hidden = !isNew;
+  if(isNew){ lockTema = (perfil&&perfil.tema)||"azul"; $("#lock-nombre").value = (perfil&&perfil.nombre)||""; $("#lock-themes").innerHTML = themeButtons(lockTema); }
+  const nm = perfil && perfil.nombre;
+  $("#lock-eyebrow").textContent = nm ? "Hucha de" : "Bienvenido a";
+  $("#lock-name").textContent = nm || "tu hucha";
+  $("#lock-ok").textContent = isNew ? "Crear mi hucha" : "Entrar";
   $("#lock-msg").textContent = msg || ({
     loading:"Abriendo tu hucha…",
-    create:"Crea una contraseña para que solo tú puedas entrar. Mínimo 4 caracteres.",
+    create:"Ponle tu nombre, elige un color y crea una contraseña para que solo tú puedas entrar.",
     enter:"Escribe tu contraseña para entrar.",
     error:"No se ha podido conectar con tus datos."
   })[state];
-  if(!form.hidden) setTimeout(()=>pw.focus(), 30);
+  if(!form.hidden) setTimeout(()=>(isNew && !$("#lock-nombre").value ? $("#lock-nombre") : pw).focus(), 30);
 }
-function unlock(){ lockState="open"; fails=0; $("#lock").hidden = true; $("#app").hidden = false; $("#fab").hidden = false; render(); }
+function unlock(){ lockState="open"; fails=0; $("#lock").hidden = true; $("#app").hidden = false; $("#fab").hidden = false; render(); if(!perfil || !perfil.nombre) setTimeout(()=>formAjustes(true), 200); }
 $("#lock-form").addEventListener("submit", async ev=>{
   ev.preventDefault();
   const pw=$("#lock-pw").value, err=$("#lock-err"), ok=$("#lock-ok");
   err.textContent = "";
   if(lockState==="create"){
+    const nombre = $("#lock-nombre").value.trim();
+    if(!nombre){ err.textContent="Escribe tu nombre."; $("#lock-nombre").focus(); return; }
     if(pw.length<4){ err.textContent="La contraseña necesita al menos 4 caracteres."; return; }
     if(pw!==$("#lock-pw2").value){ err.textContent="Las dos contraseñas no coinciden."; return; }
     ok.disabled=true;
-    try{ await saveAccess(await makeAccess(pw)); unlock(); toast("Contraseña creada. La pediremos cada vez que entres."); }
+    try{ await saveAccess(await makeAccess(pw)); savePerfil({nombre, tema:lockTema}); unlock(); toast(`¡Hola, ${nombre}! Tu hucha está lista.`); }
     catch(e){ err.textContent="No se ha podido guardar la contraseña. Prueba otra vez."; }
     ok.disabled=false; return;
   }
@@ -876,9 +938,10 @@ let resetArmed = false;
 $("#lock-reset").addEventListener("click", ()=>{
   const b=$("#lock-reset");
   if(!resetArmed){ resetArmed=true; b.textContent="Pulsa otra vez para borrarlo todo"; setTimeout(()=>{ resetArmed=false; b.textContent="Borrar todo en este dispositivo"; }, 5000); return; }
-  try{ localStorage.removeItem(LS_KEY); localStorage.removeItem(ACC_LS); localStorage.removeItem(SEED_KEY); }catch(e){}
+  try{ localStorage.removeItem(LS_KEY); localStorage.removeItem(ACC_LS); localStorage.removeItem(SEED_KEY); localStorage.removeItem(PERFIL_KEY); }catch(e){}
+  perfil=null; applyPerfil(); loadLocal(); render();
   COLS.forEach(c=>S[c]=[]); access=null; resetArmed=false; b.textContent="Borrar todo en este dispositivo";
-  showLock("create", "App restablecida. Crea una contraseña nueva.");
+  showLock("create", "App restablecida. Empieza de nuevo con tu nombre y una contraseña.");
 });
 $("#lock-retry").addEventListener("click", ()=>initLock());
 document.addEventListener("visibilitychange", ()=>{
@@ -886,6 +949,7 @@ document.addEventListener("visibilitychange", ()=>{
   if(lockState==="open" && access && hiddenAt && Date.now()-hiddenAt>120000) showLock("enter");
 });
 async function initLock(){
+  loadPerfil();
   showLock("loading");
   try{
     access = await Promise.race([getAccess(), new Promise((_,r)=>setTimeout(()=>r(new Error("timeout")),12000))]);

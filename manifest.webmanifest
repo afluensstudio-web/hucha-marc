@@ -1,7 +1,7 @@
 {
-  "name": "Hucha de Marc",
+  "name": "Mi Hucha",
   "short_name": "Hucha",
-  "description": "App personal de ahorro de Marc.",
+  "description": "Tu app personal de ahorro: cobros por empresa y huchas.",
   "lang": "es",
   "start_url": "./",
   "scope": "./",
