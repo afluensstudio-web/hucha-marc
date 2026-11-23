@@ -638,8 +638,12 @@ select.inp{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;pa
 @media (max-width:420px){ .row2{grid-template-columns:minmax(0,1fr)} }
 @media (max-width:600px){
   .sheet-p{max-height:calc(100% - 12px)}
-  .sheet-f .btn-danger{flex:1 1 100%;order:3}
+  .sheet-f{flex-wrap:nowrap;gap:8px}
+  .sheet-f .btn-del{flex:0 0 48px;width:48px;padding:0;justify-content:center;align-self:stretch;min-height:44px;border-radius:12px}
+  .sheet-f .btn-del .del-t{display:none}
+  .sheet-f .btn-danger:not(.btn-del){flex:0 1 auto}
 }
+.sheet{bottom:auto}
 </style>
 </head>
 <body>
@@ -1457,7 +1461,7 @@ function formMov(id){
     title = "Editar salida de dinero";
     body = sacarFields(huchas, m.huchaId, "", m);
   }
-  const foot = `<button type="button" class="btn btn-danger" id="f-del">${ICON.trash}Borrar</button>`;
+  const foot = `<button type="button" class="btn btn-danger btn-del" id="f-del" aria-label="Borrar movimiento" title="Borrar">${ICON.trash}<span class="del-t">Borrar</span></button>`;
   const f = openSheet(title, sub, body, f=>{
     const imp = parse(f.importe.value); if(!imp) return "!Escribe un importe mayor que 0.";
     const ch = {importe:imp, fecha:f.fecha.value||m.fecha, nota:f.nota.value.trim()};
@@ -1798,7 +1802,11 @@ function formPassword(){
 (function(){
   const v = window.visualViewport; if(!v) return;
   const root = document.documentElement;
-  const upd = ()=>{ root.style.setProperty("--vvh", v.height+"px"); root.style.setProperty("--vvt", v.offsetTop+"px"); };
+  const upd = ()=>{
+    const kb = window.innerHeight - v.height > 120;
+    if(kb){ root.style.setProperty("--vvh", v.height+"px"); root.style.setProperty("--vvt", v.offsetTop+"px"); }
+    else { root.style.removeProperty("--vvh"); root.style.removeProperty("--vvt"); }
+  };
   v.addEventListener("resize", upd); v.addEventListener("scroll", upd); upd();
 })();
 document.addEventListener("focusin", e=>{
