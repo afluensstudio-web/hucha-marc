@@ -1,0 +1,4 @@
+# Nunca subir copias con datos personales
+*.json
+!manifest.webmanifest
+.DS_Store
