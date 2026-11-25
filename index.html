@@ -690,6 +690,8 @@ select.inp{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;pa
 }
 @media (max-width:340px){ .top-r .hb,.top-r .icon-btn{width:34px;height:34px} .top-r{gap:4px} .news-btn{height:34px;padding:0 8px;font-size:12px} .actions{grid-template-columns:repeat(3,minmax(0,1fr))} .actions .btn{font-size:13px;padding:11px 4px} }
 
+/* ---- eliminar huchas (v6.1) ---- */
+.btn-del.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
 /* ---- compras a plazos (v6) ---- */
 .plz-lbl{font-size:12.5px;color:var(--muted);margin-bottom:2px}
 .plazo .jar-btns .btn-sun{flex:1;justify-content:center}
@@ -1960,7 +1962,7 @@ function formHucha(id, defCart, asCuenta){
     <div class="field"><span class="fl">Color</span>${swatchHTML(h?h.color|0:nextColor(pool))}</div>
     ${h ? `<div class="convert-row">${ICON.cal}<span>¿Es algo que pagas a meses?</span><button type="button" class="link" id="f-toplazo">Convertir en compra a plazos</button></div>` : ""}`;
   const what = cuenta ? "la cuenta" : "la hucha";
-  const foot = h ? (saldo>0 ? `<span class="hint">Saca los ${esc(fmt(saldo))} para poder eliminar ${what}.</span>` : `<button type="button" class="btn btn-danger" id="f-del">Eliminar</button>`) : "";
+  const foot = h ? `<button type="button" class="btn btn-danger btn-del" id="f-del" aria-label="Eliminar ${what}" title="Eliminar ${what}">${ICON.trash}<span class="del-t">Eliminar</span></button>` : "";
   const f = openSheet(h ? (cuenta?"Editar cuenta de ahorro":"Editar hucha") : (cuenta?"Nueva cuenta de ahorro":"Nueva hucha"), cuenta && !h ? "Dinero en el banco que te da intereses." : "", body, f=>{
     const nombre = f.nombre.value.trim(); if(!nombre) return `!Ponle un nombre a ${what}.`;
     const hid = h ? h.id : newId();
@@ -1983,7 +1985,28 @@ function formHucha(id, defCart, asCuenta){
   }, foot);
   wireSwatch(f); wireSegs(f);
   const tp = f.querySelector("#f-toplazo"); if(tp) tp.addEventListener("click", ()=>formPlazo(null, h.id));
-  const d = f.querySelector("#f-del"); if(d) d.addEventListener("click", ()=>{ closeSheet(); del("huchas", h.id); toast(cuenta?"Cuenta eliminada":"Hucha eliminada", {label:"Deshacer", fn:()=>put("huchas", h.id, h)}); });
+  const d = f.querySelector("#f-del");
+  if(d){
+    let armed = false;
+    d.addEventListener("click", ()=>{
+      if(!armed){
+        armed = true; d.classList.add("armed");
+        $("#sh-err").textContent = saldo>0 ? `Pulsa otra vez la papelera para eliminar ${what}. Sus ${fmtReal(saldo)} volverán a «sin repartir» en ${cartName(hCart(h)).toLowerCase()}.` : `Pulsa otra vez la papelera para eliminar ${what}.`;
+        setTimeout(()=>{ armed = false; d.classList.remove("armed"); }, 5000);
+        return;
+      }
+      closeSheet();
+      const back = Math.max(0, calc().jar[h.id]||0), added = [];
+      if(back){ const mv = {id:newId(), tipo:"retirar", huchaId:h.id, importe:back, destino:"disponible", categoria:"", fecha:todayISO(), nota:`${cuenta?"Cuenta":"Hucha"} «${h.nombre}» eliminada`, creado:Date.now()}; S.movs.push(mv); added.push(mv.id); }
+      const j = S.huchas.findIndex(x=>x.id===h.id); if(j>=0) S.huchas[j] = {...S.huchas[j], archivada:true};
+      saveLocal(); render();
+      toast(back ? `«${h.nombre}» eliminada. ${fmtReal(back)} vuelven a sin repartir` : `«${h.nombre}» eliminada`, {label:"Deshacer", fn:()=>{
+        S.movs = S.movs.filter(m=>!added.includes(m.id));
+        const i = S.huchas.findIndex(x=>x.id===h.id); if(i>=0) S.huchas[i] = {...S.huchas[i], archivada:false};
+        saveLocal(); render(); toast("Recuperada");
+      }}, 7000);
+    });
+  }
 }
 
 /* ---------- ayuda + novedades ---------- */
