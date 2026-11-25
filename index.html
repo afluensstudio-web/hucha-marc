@@ -644,6 +644,50 @@ select.inp{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;pa
 }
 .sheet{inset:0;height:auto}
 @media (max-width:600px){ .sheet{padding:0 0 var(--kb,0px)} .sheet-p{max-height:calc(100% - 12px)} }
+
+/* ---- efectivo · tarjeta · cuentas (v5) ---- */
+.vault{gap:18px}
+.vtabs{display:flex;gap:2px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:3px;width:max-content;max-width:100%;position:relative;z-index:1}
+.vtabs button{border:0;background:transparent;color:var(--vault-soft);font-weight:600;font-size:13.5px;padding:7px 14px;border-radius:9px;transition:background .2s,color .2s}
+.vtabs button[aria-selected="true"]{background:#fff;color:color-mix(in srgb, var(--vault) 85%, #000)}
+.vslides{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch;margin-inline:calc(-1 * clamp(20px,4vw,40px));position:relative;z-index:1}
+.vslides::-webkit-scrollbar{display:none}
+.vslide{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;padding-inline:clamp(20px,4vw,40px);display:grid;gap:22px;align-content:start;min-width:0}
+.vdots{display:flex;gap:6px;justify-content:center;position:relative;z-index:1}
+.vdots i{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.35);transition:width .25s,background .25s}
+.vdots i.on{width:18px;background:#fff}
+.sw-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:0}
+.sw-dot.ef{background:#FFD487} .sw-dot.ta{background:#9FD8FF}
+.stat.cart-st .delta{font-weight:500;opacity:.9}
+.jars{display:grid;gap:26px}
+.grp-h{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.grp-h h3{font-size:16px;font-weight:600;flex:1}
+.grp-h .num{font-weight:600;color:var(--muted)}
+.cart-ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--muted);flex:none}
+.cart-ic svg{width:16px;height:16px}
+.acct-ic{width:32px;height:32px;border-radius:9px;background:color-mix(in srgb, var(--c) 14%, var(--surface));color:var(--c);display:grid;place-items:center;flex:none}
+.acct-ic svg{width:17px;height:17px}
+.acct .jar-top{gap:10px}
+.acct-n{flex:1;min-width:0}
+.acct-n h3{font-size:15.5px;font-weight:600;overflow-wrap:anywhere;line-height:1.2}
+.acct-n small{display:block;color:var(--muted);font-size:12.5px}
+.tae{font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:color-mix(in srgb, var(--good) 13%, transparent);color:var(--good);white-space:nowrap}
+.acct-int{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.acct-int small{display:block;font-size:11.5px;color:var(--muted)}
+.acct-int b{font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.acct .jar-btns .btn{padding:9px 8px}
+.acct .jar-btns svg{width:16px;height:16px}
+.acct-empty{grid-column:1/-1}
+#cuentas .jar-new{min-height:110px}
+@media (max-width:560px){
+  .vslides{margin-inline:-18px}
+  .vslide{padding-inline:18px}
+  .actions{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .vtabs{width:100%} .vtabs button{flex:1;padding:8px 6px}
+  .acct .jar-btns [data-act="interes"] svg{display:none}
+  .acct .jar-btns .btn{font-size:13px}
+}
+@media (max-width:340px){ .top-r .hb,.top-r .icon-btn{width:34px;height:34px} .top-r{gap:4px} .news-btn{height:34px;padding:0 8px;font-size:12px} .actions{grid-template-columns:repeat(3,minmax(0,1fr))} .actions .btn{font-size:13px;padding:11px 4px} }
 </style>
 </head>
 <body>
@@ -690,34 +734,40 @@ select.inp{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;pa
     </div>
   </header>
 
-  <section class="vault" aria-labelledby="vault-l">
-    <div>
-      <div class="lbl" id="vault-l">Total ahorrado en tus huchas</div>
-      <div class="big num" id="total">0<small>€</small></div>
+  <section class="vault" aria-label="Tu dinero">
+    <div class="vtabs" role="tablist" aria-label="Ver tu dinero">
+      <button type="button" role="tab" data-v="total" aria-selected="true">Total</button>
+      <button type="button" role="tab" data-v="efectivo" aria-selected="false" id="vt-ef">Efectivo</button>
+      <button type="button" role="tab" data-v="tarjeta" aria-selected="false" id="vt-ta">Tarjeta</button>
     </div>
-    <div class="stats">
-      <div class="stat pend"><div class="lbl">Sin repartir</div><div class="v num" id="st-pend">0 €</div></div>
-      <div class="stat"><div class="lbl" id="st-mes-l">Cobrado este mes</div><div class="v num" id="st-mes">0 €</div><div class="delta" id="st-delta" hidden></div></div>
-      <div class="stat"><div class="lbl" id="st-ano-l">Cobrado este año</div><div class="v num" id="st-ano">0 €</div></div>
-      <button type="button" class="stat owe" id="st-owe" data-act="ver-pend" hidden><div class="lbl">Te deben</div><div class="v num" id="st-owe-v">0 €</div><div class="delta">Ver pendientes →</div></button>
+    <div class="vslides" id="vslides">
+      <div class="vslide" id="vs-total"></div>
+      <div class="vslide" id="vs-efectivo"></div>
+      <div class="vslide" id="vs-tarjeta"></div>
     </div>
-    <div class="dist">
-      <div class="bar" id="bar" role="img" aria-label="Reparto del dinero entre huchas"></div>
-      <div class="legend" id="legend"></div>
-    </div>
+    <div class="vdots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
     <div class="actions">
       <button class="btn btn-sun" data-act="cobro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Añadir cobro</button>
-      <button class="btn btn-ghost-v" data-act="repartir">Repartir en huchas</button>
-      <button class="btn btn-ghost-v" data-act="sacar">Sacar dinero</button>
+      <button class="btn btn-ghost-v" data-act="repartir">Repartir</button>
+      <button class="btn btn-ghost-v" data-act="sacar">Sacar</button>
+      <button class="btn btn-ghost-v" data-act="traspaso">Mover</button>
     </div>
   </section>
 
   <section class="sec" aria-labelledby="h-huchas">
     <div class="sec-h">
-      <div><h2 id="h-huchas">Tus huchas</h2><p>Cada hucha guarda dinero para una meta.</p></div>
+      <div><h2 id="h-huchas">Tus huchas</h2><p id="h-huchas-p">Cada hucha guarda dinero para una meta.</p></div>
       <div style="display:flex;gap:4px;flex-wrap:wrap"><button class="link" data-act="reglas">Reglas de reparto</button><button class="link" data-act="hucha-new">+ Nueva hucha</button></div>
     </div>
-    <div class="grid" id="jars"></div>
+    <div class="jars" id="jars"></div>
+  </section>
+
+  <section class="sec" id="sec-cuentas" aria-labelledby="h-cuentas">
+    <div class="sec-h">
+      <div><h2 id="h-cuentas">Cuentas de ahorro</h2><p>Dinero en el banco que te da intereses.</p></div>
+      <button class="link" data-act="cuenta-new">+ Nueva cuenta</button>
+    </div>
+    <div class="grid" id="cuentas"></div>
   </section>
 
   <section class="sec" id="sec-emp" aria-labelledby="h-emp">
@@ -779,7 +829,7 @@ const LS_KEY = "hucha-marc-v1";
 const S = { empresas:[], huchas:[], movs:[], reglas:[] };
 let filter = "all", filterEmp = "", filterMes = "", showAll = false, gastoPer = "mes";
 let priv = false; try{ priv = localStorage.getItem("hucha-privado")==="1"; }catch(e){}
-const NEWS_KEY = "hucha-novedades-v3", NEWS_UNTIL = "2026-12-07";
+const NEWS_KEY = "hucha-novedades-v5", NEWS_UNTIL = "2026-12-09";
 
 /* ---------- utils ---------- */
 const $ = (s, r=document) => r.querySelector(s);
@@ -832,36 +882,63 @@ const ICON = {
   rule:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M12 12l7-5M12 12l-7-5M12 12l6 6M12 12l-6 6"/></svg>',
   tag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg>',
   filter:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6 7.5V19l-4 1.5v-8L4 5z"/></svg>',
+  cash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg>',
+  card:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6.5 15h4"/></svg>',
+  bank:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M5 10v7M9.5 10v7M14.5 10v7M19 10v7M3 20h18"/></svg>',
+  swap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/></svg>',
+  pct:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5 5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg>',
   party:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l5-13 8 8-13 5z"/><path d="M14 4v2M19 9h2M17.5 5.5l-1.5 1.5"/></svg>',
   x:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
 };
 
+/* ---------- carteras: efectivo y tarjeta ---------- */
+const CARTS = ["efectivo","tarjeta"];
+const VIEWS = ["total","efectivo","tarjeta"];
+let view = "total";
+const cartName = c => c==="tarjeta" ? (pget("nombreTa")||"Tarjeta") : (pget("nombreEf")||"Efectivo");
+const isCuenta = h => !!h && h.tipo==="cuenta";
+const hCart = h => isCuenta(h) ? "tarjeta" : ((h && h.cartera)==="tarjeta" ? "tarjeta" : "efectivo");
+const cartOfId = id => hCart(S.huchas.find(h=>h.id===id));
+const mvCart = m => m.cartera==="tarjeta" ? "tarjeta" : "efectivo";
+const otherCart = c => c==="tarjeta" ? "efectivo" : "tarjeta";
+const pctTxt = n => (+n||0).toLocaleString("es-ES",{maximumFractionDigits:2}) + " %";
+
 /* ---------- derived numbers ---------- */
 function calc(movs = S.movs){
-  const jar = {}, emp = {};
-  let ingresos=0, asignado=0, devuelto=0, deben=0, mes=0, prev=0, ano=0;
+  const jar = {}, emp = {}, pendC = {efectivo:0, tarjeta:0};
+  let deben=0, mes=0, prev=0, ano=0, interesAno=0;
   const cur = ymNow(), prv = shiftYM(cur,-1), y = cur.slice(0,4);
+  const hmap = {}; for(const h of S.huchas) hmap[h.id]=h;
+  const hc = id => hCart(hmap[id]);
   for(const mv of movs){
     const a = mv.importe|0;
     if(mv.tipo==="ingreso"){
-      const e = emp[mv.empresaId] ||= {total:0, ano:0, mes:0, n:0, deben:0};
+      const e = emp[mv.empresaId||""] ||= {total:0, ano:0, mes:0, n:0, deben:0};
       if(isPend(mv)){ deben+=a; e.deben+=a; continue; }
-      ingresos+=a; e.total+=a; e.n++;
+      pendC[mvCart(mv)] += a; e.total+=a; e.n++;
       const ym = ymOf(mv.fecha);
       if(ym.startsWith(y)){ ano+=a; e.ano+=a; }
       if(ym===cur){ mes+=a; e.mes+=a; }
       if(ym===prv) prev+=a;
     } else if(mv.tipo==="asignar"){
-      asignado+=a; jar[mv.huchaId]=(jar[mv.huchaId]||0)+a;
+      pendC[hc(mv.huchaId)] -= a; jar[mv.huchaId]=(jar[mv.huchaId]||0)+a;
     } else if(mv.tipo==="retirar"){
       jar[mv.huchaId]=(jar[mv.huchaId]||0)-a;
-      if(mv.destino==="disponible") devuelto+=a;
+      if(mv.destino==="disponible") pendC[hc(mv.huchaId)] += a;
+    } else if(mv.tipo==="interes"){
+      jar[mv.huchaId]=(jar[mv.huchaId]||0)+a;
+      if(ymOf(mv.fecha).startsWith(y)) interesAno+=a;
+    } else if(mv.tipo==="traspaso"){
+      const de = mv.de==="tarjeta" ? "tarjeta" : "efectivo";
+      pendC[de]-=a; pendC[otherCart(de)]+=a;
     }
   }
-  const pend = ingresos - asignado + devuelto;
-  const total = S.huchas.reduce((s,h)=>s+Math.max(0,jar[h.id]||0),0);
+  const huchasC = {efectivo:0, tarjeta:0}; let cuentas = 0, interesEst = 0;
+  for(const h of S.huchas){ const v = Math.max(0, jar[h.id]||0); if(isCuenta(h)){ cuentas+=v; interesEst += Math.round(v*(+h.tae||0)/100); } else huchasC[hCart(h)] += v; }
+  const totalC = { efectivo: pendC.efectivo + huchasC.efectivo, tarjeta: pendC.tarjeta + huchasC.tarjeta + cuentas };
+  const pend = pendC.efectivo + pendC.tarjeta, total = totalC.efectivo + totalC.tarjeta;
   const [cy,cm] = cur.split("-").map(Number);
-  return { jar, emp, pend, total, mes, prev, ano, deben, monthName: MES[cm-1], prevName: MES[(cm+10)%12], year:cy };
+  return { jar, emp, pend, pendC, huchasC, cuentas, totalC, total, interesEst, interesAno, mes, prev, ano, deben, monthName: MES[cm-1], prevName: MES[(cm+10)%12], year:cy };
 }
 
 /* ---------- celebrations ---------- */
@@ -907,6 +984,99 @@ function confetti(n){
 }
 
 /* ---------- render ---------- */
+function bigHTML(c){
+  if(priv) return `•••<small> €</small>`;
+  const neg = c<0, a = Math.abs(c), euros = Math.floor(a/100), cents = String(a%100).padStart(2,"0");
+  return `${neg?"−":""}${esc(nf0.format(euros))}<small>,${cents} €</small>`;
+}
+function barParts(parts, emptyTxt){
+  const sum = parts.reduce((s,p)=>s+p.v,0);
+  const bar = sum ? parts.filter(p=>p.v>0).map(p=>`<span title="${esc(p.n)}: ${esc(fmt(p.v))}" class="${p.c?"":"unassigned"}" style="flex-grow:${p.v};${p.c?`background:${p.c}`:""}"></span>`).join("") : "";
+  const leg = sum ? parts.map(p=>`<span><i class="${p.c?"":"unassigned"}" style="background:${p.c||"rgba(255,255,255,.4)"}"></i>${esc(p.n)} <b class="num">${esc(fmt(p.v))}</b> · ${Math.round(p.v/sum*100)}%</span>`).join("") : `<span>${emptyTxt}</span>`;
+  return `<div class="dist"><div class="bar" role="img" aria-label="Reparto del dinero">${bar}</div><div class="legend">${leg}</div></div>`;
+}
+const stat = (lbl, v, cls="", extra="") => `<div class="stat ${cls}"><div class="lbl">${lbl}</div><div class="v num">${v}</div>${extra}</div>`;
+function deltaHTML(k){
+  if(!(k.prev>0)) return "";
+  const p = Math.round((k.mes-k.prev)/k.prev*100);
+  return `<div class="delta ${p>0?"up":p<0?"down":""}" title="En ${esc(k.prevName)} cobraste ${esc(fmt(k.prev))}">${p===0?`= igual que ${esc(k.prevName)}`:`${p>0?"↑":"↓"} ${Math.abs(p)} % vs ${esc(k.prevName)}`}</div>`;
+}
+function renderVault(k, huchas){
+  const ef = cartName("efectivo"), ta = cartName("tarjeta");
+  $("#vt-ef").textContent = ef; $("#vt-ta").textContent = ta;
+  const owe = k.deben ? `<button type="button" class="stat owe" data-act="ver-pend"><div class="lbl">Te deben</div><div class="v num">${esc(fmt(k.deben))}</div><div class="delta">Ver pendientes →</div></button>` : "";
+  // Total
+  $("#vs-total").innerHTML = `<div><div class="lbl">Tu dinero total</div><div class="big num">${bigHTML(k.total)}</div></div>
+    <div class="stats">
+      ${stat(`En ${esc(ef.toLowerCase())}`, esc(fmt(k.totalC.efectivo)), "cart-st", `<div class="delta"><span class="sw-dot ef"></span>Desliza para ver →</div>`)}
+      ${stat(`En ${esc(ta.toLowerCase())}`, esc(fmt(k.totalC.tarjeta)), "cart-st", `<div class="delta"><span class="sw-dot ta"></span>${k.cuentas?`${esc(fmt(k.cuentas))} en cuentas`:"Huchas y cuentas"}</div>`)}
+      ${stat(`Cobrado en ${esc(k.monthName)}`, esc(fmt(k.mes)), "", deltaHTML(k))}
+      ${stat(`Cobrado en ${k.year}`, esc(fmt(k.ano)))}
+      ${owe}
+    </div>
+    ${barParts([{n:ef, c:"#FFD487", v:Math.max(0,k.totalC.efectivo)},{n:ta, c:"#9FD8FF", v:Math.max(0,k.totalC.tarjeta)}], "Cuando añadas cobros, aquí verás cuánto tienes en efectivo y cuánto en tarjeta.")}`;
+  // Por cartera
+  for(const c of CARTS){
+    const hs = huchas.filter(h=>hCart(h)===c);
+    const parts = hs.map(h=>({n:h.nombre + (isCuenta(h)?" (cuenta)":""), c:color(h.color), v:Math.max(0,k.jar[h.id]||0)})).filter(p=>p.v>0);
+    if(k.pendC[c]>0) parts.push({n:"Sin repartir", c:null, v:k.pendC[c]});
+    const extra = c==="tarjeta" ? (S.huchas.some(isCuenta) ? stat("En cuentas de ahorro", esc(fmt(k.cuentas))) + stat("Intereses al año", `≈ ${esc(fmt(k.interesEst))}`, "", k.interesAno?`<div class="delta up">${esc(fmt(k.interesAno))} ganados en ${k.year}</div>`:"") : "") : "";
+    $("#vs-"+c).innerHTML = `<div><div class="lbl">En ${esc(cartName(c).toLowerCase())}</div><div class="big num">${bigHTML(k.totalC[c])}</div></div>
+      <div class="stats">
+        ${stat("Sin repartir", esc(fmt(k.pendC[c])), "pend")}
+        ${stat("En huchas", esc(fmt(k.huchasC[c])))}
+        ${extra}
+      </div>
+      ${barParts(parts, c==="tarjeta" ? "Apunta cobros que recibes en el banco y repártelos en huchas o cuentas de ahorro." : "Apunta cobros en efectivo y repártelos en tus huchas.")}`;
+  }
+  document.querySelectorAll(".vtabs button").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.v===view)));
+  document.querySelectorAll(".vdots i").forEach((d,i)=>d.classList.toggle("on", VIEWS[i]===view));
+}
+function jarCard(h, k){
+  const v = k.jar[h.id]||0;
+  return `<article class="jar" style="--c:${color(h.color)}">
+    <div class="jar-top"><span class="jar-dot"></span><h3>${esc(h.nombre)}</h3><button class="edit" data-act="hucha-edit" data-id="${esc(h.id)}" aria-label="Editar ${esc(h.nombre)}">${ICON.edit}</button></div>
+    <div class="jar-body">
+      <div class="jar-amt num">${esc(fmt(v))}</div>
+      ${goalHTML(h, v)}
+      <div class="jar-btns">
+        <button class="btn btn-soft" data-act="repartir" data-id="${esc(h.id)}">${ICON.plus}Meter</button>
+        <button class="btn btn-soft" data-act="sacar" data-id="${esc(h.id)}" ${v>0?"":"disabled"}>Sacar</button>
+      </div>
+    </div></article>`;
+}
+function acctCard(h, k){
+  const v = k.jar[h.id]||0, tae = +h.tae||0, yr = Math.round(Math.max(0,v)*tae/100), mo = Math.round(yr/12);
+  const earned = S.movs.filter(m=>m.tipo==="interes" && m.huchaId===h.id && ymOf(m.fecha).startsWith(String(k.year))).reduce((s,m)=>s+(m.importe|0),0);
+  return `<article class="jar acct" style="--c:${color(h.color)}">
+    <div class="jar-top"><span class="acct-ic">${ICON.bank}</span><div class="acct-n"><h3>${esc(h.nombre)}</h3>${h.banco?`<small>${esc(h.banco)}</small>`:""}</div><span class="tae num">${esc(pctTxt(tae))} TAE</span><button class="edit" data-act="hucha-edit" data-id="${esc(h.id)}" aria-label="Editar ${esc(h.nombre)}">${ICON.edit}</button></div>
+    <div class="jar-body">
+      <div class="jar-amt num">${esc(fmt(v))}</div>
+      <div class="acct-int"><div><small>Al mes</small><b class="num">≈ ${esc(fmt(mo))}</b></div><div><small>Al año</small><b class="num">≈ ${esc(fmt(yr))}</b></div><div><small>Ganado en ${k.year}</small><b class="num">${esc(fmt(earned))}</b></div></div>
+      <div class="jar-btns">
+        <button class="btn btn-soft" data-act="repartir" data-id="${esc(h.id)}">${ICON.plus}Meter</button>
+        <button class="btn btn-soft" data-act="sacar" data-id="${esc(h.id)}" ${v>0?"":"disabled"}>Sacar</button>
+        <button class="btn btn-soft" data-act="interes" data-id="${esc(h.id)}" title="Apuntar intereses">${ICON.pct}<span class="int-t">Intereses</span></button>
+      </div>
+    </div></article>`;
+}
+function newJarBtn(c){ return `<button class="jar-new" data-act="hucha-new" data-cart="${c}"><div><div class="plus">+</div>Crear una hucha<div class="hint" style="font-weight:500">en ${esc(cartName(c).toLowerCase())}</div></div></button>`; }
+function renderJars(k, huchas){
+  const list = huchas.filter(h=>!isCuenta(h));
+  const grp = c => list.filter(h=>hCart(h)===c);
+  $("#h-huchas-p").textContent = view==="total" ? `Tus huchas en ${cartName("efectivo").toLowerCase()} y en ${cartName("tarjeta").toLowerCase()}.` : `Huchas con dinero en ${cartName(view).toLowerCase()}.`;
+  $("#jars").innerHTML = view==="total"
+    ? CARTS.map(c=>`<div class="jgrp"><div class="grp-h"><span class="cart-ic">${c==="tarjeta"?ICON.card:ICON.cash}</span><h3>${esc(cartName(c))}</h3><span class="num">${esc(fmt(k.huchasC[c]))}</span></div><div class="grid">${grp(c).map(h=>jarCard(h,k)).join("")}${newJarBtn(c)}</div></div>`).join("")
+    : `<div class="grid">${grp(view).map(h=>jarCard(h,k)).join("")}${newJarBtn(view)}</div>`;
+}
+function renderCuentas(k, huchas){
+  const sec = $("#sec-cuentas"); sec.hidden = view==="efectivo";
+  if(sec.hidden) return;
+  const cs = huchas.filter(isCuenta);
+  $("#cuentas").innerHTML = cs.length
+    ? cs.map(h=>acctCard(h,k)).join("") + `<button class="jar-new" data-act="cuenta-new"><div><div class="plus">+</div>Añadir cuenta<div class="hint" style="font-weight:500">con su TAE</div></div></button>`
+    : `<div class="empty panel acct-empty"><strong>¿Tienes una cuenta de ahorro?</strong><span>Añádela con la TAE que te da el banco y verás cuánto te genera al mes y al año.</span><button class="btn btn-ink" data-act="cuenta-new">${ICON.plus}Añadir cuenta de ahorro</button></div>`;
+}
 function render(){
   const k = calc();
   const huchas = sorted(S.huchas), empresas = sorted(S.empresas);
@@ -914,46 +1084,10 @@ function render(){
   const st = $("#status"); st.className="status"; st.querySelector("span").textContent="Guardado en este dispositivo";
   const eye = $("#btn-eye"); eye.innerHTML = priv ? ICON.eyeOff : ICON.eye; eye.setAttribute("aria-pressed", String(priv)); eye.setAttribute("aria-label", priv ? "Mostrar importes" : "Ocultar importes"); eye.title = priv ? "Mostrar importes" : "Ocultar importes";
   $("#btn-news").hidden = !(todayISO() <= NEWS_UNTIL);
-
-  if(priv) $("#total").innerHTML = `•••<small> €</small>`;
-  else { const euros = Math.floor(k.total/100), cents = String(k.total%100).padStart(2,"0"); $("#total").innerHTML = `${esc(nf0.format(euros))}<small>,${cents} €</small>`; }
-  $("#st-pend").textContent = fmt(k.pend);
-  $("#st-mes-l").textContent = "Cobrado en " + k.monthName;
-  $("#st-mes").textContent = fmt(k.mes);
-  const dl = $("#st-delta");
-  if(k.prev>0){
-    const p = Math.round((k.mes-k.prev)/k.prev*100);
-    dl.hidden = false; dl.className = "delta " + (p>0?"up":p<0?"down":"");
-    dl.textContent = p===0 ? `= igual que ${k.prevName}` : `${p>0?"↑":"↓"} ${Math.abs(p)} % vs ${k.prevName}`;
-    dl.title = `En ${k.prevName} cobraste ${fmt(k.prev)}`;
-  } else dl.hidden = true;
-  $("#st-ano-l").textContent = "Cobrado en " + k.year;
-  $("#st-ano").textContent = fmt(k.ano);
-  $("#st-owe").hidden = !k.deben; $("#st-owe-v").textContent = fmt(k.deben);
-
-  // distribution bar
-  const parts = huchas.map(h=>({n:h.nombre, c:color(h.color), v:Math.max(0,k.jar[h.id]||0)})).filter(p=>p.v>0);
-  if(k.pend>0) parts.push({n:"Sin repartir", c:null, v:k.pend});
-  const sum = parts.reduce((s,p)=>s+p.v,0);
-  $("#bar").innerHTML = sum ? parts.map(p=>`<span title="${esc(p.n)}: ${esc(fmt(p.v))}" class="${p.c?"":"unassigned"}" style="flex-grow:${p.v};${p.c?`background:${p.c}`:""}"></span>`).join("") : "";
-  $("#legend").innerHTML = sum ? parts.map(p=>`<span><i class="${p.c?"":"unassigned"}" style="background:${p.c||"rgba(255,255,255,.4)"}"></i>${esc(p.n)} <b class="num">${esc(fmt(p.v))}</b> · ${Math.round(p.v/sum*100)}%</span>`).join("")
-    : `<span>Cuando añadas un cobro y lo repartas, aquí verás cómo se divide tu dinero.</span>`;
-
-  // huchas
-  $("#jars").innerHTML = huchas.map(h=>{
-    const v = k.jar[h.id]||0;
-    return `<article class="jar" style="--c:${color(h.color)}">
-      <div class="jar-top"><span class="jar-dot"></span><h3>${esc(h.nombre)}</h3><button class="edit" data-act="hucha-edit" data-id="${esc(h.id)}" aria-label="Editar ${esc(h.nombre)}">${ICON.edit}</button></div>
-      <div class="jar-body">
-        <div class="jar-amt num">${esc(fmt(v))}</div>
-        ${goalHTML(h, v)}
-        <div class="jar-btns">
-          <button class="btn btn-soft" data-act="repartir" data-id="${esc(h.id)}">${ICON.plus}Meter</button>
-          <button class="btn btn-soft" data-act="sacar" data-id="${esc(h.id)}" ${v>0?"":"disabled"}>Sacar</button>
-        </div>
-      </div></article>`;
-  }).join("") + `<button class="jar-new" data-act="hucha-new"><div><div class="plus">+</div>Crear una hucha<div class="hint" style="font-weight:500">Viajes, coche, colchón…</div></div></button>`;
-  checkCelebrations(huchas, k);
+  renderVault(k, huchas);
+  renderJars(k, huchas);
+  checkCelebrations(huchas.filter(h=>!isCuenta(h)), k);
+  renderCuentas(k, huchas);
 
   // empresas
   $("#emps").innerHTML = empresas.length ? empresas.map(e=>{
@@ -972,6 +1106,27 @@ function render(){
   renderGastos();
   renderFilters(empresas);
   renderMoves();
+}
+
+/* ---------- carrusel Total · Efectivo · Tarjeta ---------- */
+let navLockUntil = 0;
+function goView(v, smooth=true){
+  if(!VIEWS.includes(v)) v = "total";
+  const sc = $("#vslides"); const i = VIEWS.indexOf(v);
+  navLockUntil = Date.now() + (smooth ? 900 : 100);
+  if(view!==v){ view = v; render(); }
+  sc.scrollTo({left: i*sc.clientWidth, behavior: smooth ? "smooth" : "auto"});
+  setTimeout(()=>{ if(Math.round(sc.scrollLeft/Math.max(1,sc.clientWidth))!==VIEWS.indexOf(view)) sc.scrollLeft = VIEWS.indexOf(view)*sc.clientWidth; }, smooth ? 950 : 120);
+}
+function setupCarousel(){
+  const sc = $("#vslides"); let t;
+  sc.addEventListener("scroll", ()=>{ clearTimeout(t); t = setTimeout(()=>{
+    if(Date.now() < navLockUntil) return;
+    const i = Math.max(0, Math.min(2, Math.round(sc.scrollLeft / Math.max(1, sc.clientWidth))));
+    if(VIEWS[i]!==view){ view = VIEWS[i]; render(); }
+  }, 90); }, {passive:true});
+  document.querySelectorAll(".vtabs button").forEach(b=>b.addEventListener("click", ()=>goView(b.dataset.v)));
+  window.addEventListener("resize", ()=>{ sc.scrollLeft = VIEWS.indexOf(view)*sc.clientWidth; });
 }
 
 function goalHTML(h, v){
@@ -1025,12 +1180,12 @@ function renderChart(empresas){
   });
   box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cobros por mes y empresa, últimos 6 meses">${g}${bars}</svg><div class="tip" hidden></div>`;
   const used = order.filter(id=>months.some(m=>m.by[id]));
-  leg.innerHTML = used.map(id=>{ const e=S.empresas.find(z=>z.id===id); return `<span><i style="background:${color(e.color)}"></i>${esc(e.nombre)}</span>`; }).join("");
+  leg.innerHTML = used.map(id=>{ const e=S.empresas.find(z=>z.id===id); return `<span><i style="background:${color(e.color)}"></i>${esc(e.nombre)}</span>`; }).join("") + (months.some(m=>m.by[""])?`<span><i style="background:var(--faint)"></i>Otros ingresos</span>`:"");
   const tip = box.querySelector(".tip"), svg = box.querySelector("svg");
   box.querySelectorAll(".col-hit").forEach(el=>{
     const show = ()=>{
       const m = months[+el.dataset.i];
-      const rows = order.filter(id=>m.by[id]).map(id=>{ const e=S.empresas.find(z=>z.id===id); return `<div><span><i style="background:${color(e.color)}"></i>${esc(e.nombre)}</span><span class="num">${esc(fmt(m.by[id]))}</span></div>`; }).join("");
+      const rows = order.filter(id=>m.by[id]).concat(m.by[""]?[""]:[]).map(id=>{ const e=S.empresas.find(z=>z.id===id)||{nombre:"Otros ingresos",color:null}; return `<div><span><i style="background:${e.color==null?"var(--faint)":color(e.color)}"></i>${esc(e.nombre)}</span><span class="num">${esc(fmt(m.by[id]))}</span></div>`; }).join("");
       tip.innerHTML = `<b>${esc(m.full)}</b>${rows || "<div>Sin cobros</div>"}${m.total?`<div class="t"><span>Total</span><span class="num">${esc(fmt(m.total))}</span></div>`:""}`;
       const sr = svg.getBoundingClientRect(), br = box.getBoundingClientRect(), s = sr.width/W;
       const i = +el.dataset.i; let left = (L + cw*i + cw/2)*s;
@@ -1072,10 +1227,14 @@ function renderFilters(empresas){
 function movView(m){
   const e = S.empresas.find(z=>z.id===m.empresaId), h = S.huchas.find(z=>z.id===m.huchaId);
   if(m.tipo==="ingreso"){
-    if(isPend(m)) return {c:e?color(e.color):"var(--faint)", ic:ICON.clock, t:`Factura a ${e?e.nombre:"empresa borrada"}`, s:[m.clase, m.nota].filter(Boolean).join(" · "), a:fmt(m.importe), cls:"owe", pill:"Pendiente"};
-    return {c:e?color(e.color):"var(--faint)", ic:ICON.inc, t:`Cobro de ${e?e.nombre:"empresa borrada"}`, s:[m.clase, m.nota].filter(Boolean).join(" · "), a:"+"+fmt(m.importe), cls:"in"};
+    const who = e ? e.nombre : (m.empresaId ? "empresa borrada" : "");
+    const s = [m.clase, cartName(mvCart(m)), m.nota].filter(Boolean).join(" · ");
+    if(isPend(m)) return {c:e?color(e.color):"var(--faint)", ic:ICON.clock, t: who?`Factura a ${who}`:"Ingreso pendiente", s, a:fmt(m.importe), cls:"owe", pill:"Pendiente"};
+    return {c:e?color(e.color):"var(--faint)", ic:ICON.inc, t: who?`Cobro de ${who}`:"Otro ingreso", s, a:"+"+fmt(m.importe), cls:"in"};
   }
-  if(m.tipo==="asignar") return {c:h?color(h.color):"var(--faint)", ic:ICON.jar, t:`A la hucha ${h?h.nombre:"borrada"}`, s:m.nota||"Desde sin repartir", a:fmt(m.importe), cls:"mid"};
+  if(m.tipo==="asignar") return {c:h?color(h.color):"var(--faint)", ic:isCuenta(h)?ICON.bank:ICON.jar, t:`${isCuenta(h)?"A la cuenta":"A la hucha"} ${h?h.nombre:"borrada"}`, s:m.nota||`Desde sin repartir · ${cartName(hCart(h))}`, a:fmt(m.importe), cls:"mid"};
+  if(m.tipo==="traspaso"){ const de = m.de==="tarjeta"?"tarjeta":"efectivo"; return {c:"var(--c6)", ic:ICON.swap, t:`${cartName(de)} → ${cartName(otherCart(de))}`, s:m.nota||(de==="tarjeta"?"Sacado del cajero":"Ingresado en el banco"), a:fmt(m.importe), cls:"mid"}; }
+  if(m.tipo==="interes") return {c:h?color(h.color):"var(--faint)", ic:ICON.pct, t:`Intereses de ${h?h.nombre:"cuenta borrada"}`, s:m.nota||"", a:"+"+fmt(m.importe), cls:"in"};
   const back = m.destino==="disponible", cat = catOf(m.categoria);
   return {c:h?color(h.color):"var(--faint)", ic:ICON.out, t:`Sacado de ${h?h.nombre:"hucha borrada"}`, s:[back?"Vuelve a sin repartir":(cat?cat.nombre:"Gastado"), m.nota].filter(Boolean).join(" · "), a:(back?"":"−")+fmt(m.importe), cls:back?"mid":"out", cat: !back && cat ? cat : null};
 }
@@ -1332,7 +1491,7 @@ function formRegla(id){
 /* ---------- validation by simulation ---------- */
 function checkMovs(next){
   const kk = calc(next);
-  if(kk.pend < 0) return `!Con este cambio, tu dinero sin repartir quedaría en ${fmtReal(kk.pend)}. Ajusta primero lo que tienes repartido.`;
+  for(const c of CARTS) if(kk.pendC[c] < 0) return `!Con este cambio, tu dinero sin repartir en ${cartName(c).toLowerCase()} quedaría en ${fmtReal(kk.pendC[c])}. Ajusta primero lo que tienes repartido o mueve dinero.`;
   const neg = S.huchas.find(h=>(kk.jar[h.id]||0) < 0);
   if(neg) return `!La hucha ${neg.nombre} quedaría en negativo (${fmtReal(kk.jar[neg.id])}).`;
   return null;
@@ -1343,67 +1502,90 @@ const ESTADOS = [{v:"cobrado", l:"Ya lo he cobrado"},{v:"pendiente", l:"Pendient
 const CLASES = ["Nómina","Factura","Paga extra","Propinas","Otro"];
 function claseSelect(sel){ return `<select class="inp" id="f-clase" name="clase">${CLASES.map(c=>`<option ${c===sel?"selected":""}>${c}</option>`).join("")}</select>`; }
 
+function cartSeg(name, sel, k){ return segHTML(name, CARTS.map(c=>({v:c, l: k ? `${cartName(c)} · ${fmtReal(Math.max(0,k.pendC[c]))}` : cartName(c)})), sel); }
+function cobroEmpresas(){ return [...sorted(S.empresas), {id:"_otro", nombre:"Otro ingreso", color:7}]; }
+
 function formCobro(empId){
-  const empresas = sorted(S.empresas), huchas = sorted(S.huchas);
-  if(!empresas.length){ formEmpresa(null, true); return; }
-  const sel = empId || (empresas.length===1 ? empresas[0].id : "");
+  const empresas = sorted(S.empresas);
+  const sel = empId || (empresas.length===1 ? empresas[0].id : (empresas.length ? "" : "_otro"));
+  let cart = view!=="total" ? view : (pget("cartDef")==="tarjeta" ? "tarjeta" : "efectivo");
   const body = `
-    <div class="field"><span class="fl">¿De qué empresa?</span>${pickerHTML("empresa", empresas, sel)}</div>
+    <div class="field"><span class="fl">¿De dónde viene?</span>${pickerHTML("empresa", cobroEmpresas(), sel)}${empresas.length?"":`<button type="button" class="link" data-act="empresa-new" style="justify-self:start">+ Añadir una empresa</button>`}</div>
     <div class="field">${segHTML("estado", ESTADOS, "cobrado")}</div>
+    <div class="field"><span class="fl">¿Dónde lo recibes?</span>${cartSeg("cartera", cart)}</div>
     <div class="field"><label for="f-imp" id="f-imp-l">Importe cobrado (neto)</label><div class="money"><input class="inp num" id="f-imp" name="importe" inputmode="decimal" autocomplete="off" placeholder="0,00" autofocus><span>€</span></div></div>
     <div class="row2">
       <div class="field"><label for="f-fecha" id="f-fecha-l">Fecha</label><input class="inp" type="date" id="f-fecha" name="fecha" value="${todayISO()}"></div>
-      <div class="field"><label for="f-clase">Tipo</label>${claseSelect("Nómina")}</div>
+      <div class="field"><label for="f-clase">Tipo</label>${claseSelect(sel==="_otro"?"Otro":"Nómina")}</div>
     </div>
     <div class="field"><label for="f-nota">Nota (opcional)</label><input class="inp" id="f-nota" name="nota" placeholder="Ej. nómina de octubre" maxlength="120"></div>
-    <div id="split-wrap">${splitHTML(huchas)}</div>
+    <div id="split-wrap"></div>
     <div class="hint tip-line" id="pend-hint" hidden>${ICON.clock}<span>Se guardará como <b>pendiente</b> y aparecerá en «Te deben». Cuando te paguen, pulsa <b>Cobrado</b> en el movimiento y podrás repartirlo.</span></div>`;
-  let split;
+  let split = {read:()=>({}), upd:()=>{}};
   const f = openSheet("Añadir cobro", "Apunta lo que has cobrado y, si quieres, repártelo ya.", body, f=>{
     const empresa = f.empresa.value, imp = parse(f.importe.value), fecha = f.fecha.value || todayISO(), pend = f.estado.value==="pendiente";
-    if(!empresa) return "!Elige la empresa.";
+    if(!empresa) return "!Elige de dónde viene el dinero.";
     if(!imp) return pend ? "!Escribe el importe de la factura." : "!Escribe el importe que has cobrado.";
-    const grupo = newId(), now = Date.now(), e = S.empresas.find(x=>x.id===empresa);
-    if(pend){
-      put("movs", grupo, {tipo:"ingreso", estado:"pendiente", empresaId:empresa, importe:imp, fecha, clase:f.clase.value, nota:f.nota.value.trim(), grupo, creado:now});
-      return `Factura de ${fmtReal(imp)} a ${e?e.nombre:"la empresa"} apuntada como pendiente`;
-    }
+    const empresaId = empresa==="_otro" ? "" : empresa;
+    const grupo = newId(), now = Date.now(), e = S.empresas.find(x=>x.id===empresaId);
+    const base = {tipo:"ingreso", empresaId, importe:imp, fecha, clase:f.clase.value, nota:f.nota.value.trim(), cartera:cart, grupo, creado:now};
+    if(pend){ put("movs", grupo, {...base, estado:"pendiente"}); return `Factura de ${fmtReal(imp)}${e?` a ${e.nombre}`:""} apuntada como pendiente`; }
     const parts = split.read(); const used = Object.values(parts).reduce((s,v)=>s+v,0);
     if(used>imp) return `!Has repartido ${fmtReal(used)}, más de lo que has cobrado.`;
-    S.movs.push({id:grupo, tipo:"ingreso", empresaId:empresa, importe:imp, fecha, clase:f.clase.value, nota:f.nota.value.trim(), grupo, creado:now});
+    S.movs.push({id:grupo, ...base});
     let n=1; for(const [hid,v] of Object.entries(parts)) S.movs.push({id:newId(), tipo:"asignar", huchaId:hid, importe:v, fecha, nota:"Al cobrar", grupo, creado:now+(n++)});
     saveLocal(); render();
-    return used ? `Cobro de ${fmtReal(imp)} guardado y ${fmtReal(used)} repartido` : `Cobro de ${fmtReal(imp)} guardado`;
+    return used ? `Cobro de ${fmtReal(imp)} en ${cartName(cart).toLowerCase()} guardado y ${fmtReal(used)} repartido` : `Cobro de ${fmtReal(imp)} guardado en ${cartName(cart).toLowerCase()}`;
   });
-  wirePickers(f);
-  wireSegs(f, (_,v)=>{ const p = v==="pendiente"; $("#split-wrap").hidden = p; $("#pend-hint").hidden = !p; $("#f-imp-l").textContent = p ? "Importe de la factura" : "Importe cobrado (neto)"; $("#f-fecha-l").textContent = p ? "Fecha de la factura" : "Fecha"; $("#sh-t").textContent = p ? "Apuntar factura pendiente" : "Añadir cobro"; if(p) f.clase.value="Factura"; });
-  split = wireSplit(f, huchas, ()=>parse(f.importe.value));
+  const draw = ()=>{
+    const hs = sorted(S.huchas).filter(h=>hCart(h)===cart);
+    $("#split-wrap").innerHTML = hs.length ? splitHTML(hs) : `<div class="split"><div class="hint">No tienes huchas en ${esc(cartName(cart).toLowerCase())}. Puedes crearlas después y repartirlo entonces.</div></div>`;
+    split = wireSplit(f, hs, ()=>parse(f.importe.value));
+  };
+  wirePickers(f, (name,v)=>{ if(name==="empresa" && v==="_otro") f.clase.value="Otro"; });
+  wireSegs(f, (name,v)=>{
+    if(name==="cartera"){ cart = v; draw(); return; }
+    if(name!=="estado") return;
+    const p = v==="pendiente"; $("#split-wrap").hidden = p; $("#pend-hint").hidden = !p; $("#f-imp-l").textContent = p ? "Importe de la factura" : "Importe cobrado (neto)"; $("#f-fecha-l").textContent = p ? "Fecha de la factura" : "Fecha"; $("#sh-t").textContent = p ? "Apuntar factura pendiente" : "Añadir cobro"; if(p) f.clase.value="Factura";
+  });
   f.importe.addEventListener("input", ()=>split.upd());
+  draw();
 }
 
 function formRepartir(hid){
-  const huchas = sorted(S.huchas), k = calc();
-  if(!huchas.length){ formHucha(null); return; }
-  if(k.pend<=0){ toast("No tienes dinero sin repartir. Añade un cobro primero."); return; }
-  const pre = hid ? {[hid]:k.pend} : null;
-  let split;
-  const f = openSheet("Repartir en huchas", `Tienes <b class="num">${esc(fmtReal(k.pend))}</b> sin repartir.`, splitHTML(huchas, pre), f=>{
+  const k = calc();
+  if(!S.huchas.length){ formHucha(null); return; }
+  let cart = hid ? cartOfId(hid) : (view!=="total" ? view : (k.pendC.efectivo>0 ? "efectivo" : "tarjeta"));
+  if(k.pendC[cart]<=0 && (hid || k.pendC[otherCart(cart)]<=0)){ toast(`No tienes dinero sin repartir en ${cartName(cart).toLowerCase()}. Añade un cobro o mueve dinero primero.`); return; }
+  const body = (hid ? "" : `<div class="field"><span class="fl">¿De dónde sale el dinero?</span>${cartSeg("cart", cart, k)}</div>`) + `<div id="split-wrap"></div>`;
+  let split = {read:()=>({}), upd:()=>{}};
+  const f = openSheet("Repartir en huchas", "", body, f=>{
+    const avail = Math.max(0, k.pendC[cart]);
     const parts = split.read(); const used = Object.values(parts).reduce((s,v)=>s+v,0);
     if(!used) return "!Escribe cuánto quieres meter en alguna hucha.";
-    if(used>k.pend) return `!Solo tienes ${fmtReal(k.pend)} sin repartir.`;
+    if(used>avail) return `!Solo tienes ${fmtReal(avail)} sin repartir en ${cartName(cart).toLowerCase()}.`;
     const now=Date.now(), grupo=newId(); let n=0;
     for(const [h,v] of Object.entries(parts)) S.movs.push({id:newId(), tipo:"asignar", huchaId:h, importe:v, fecha:todayISO(), nota:"", grupo, creado:now+(n++)});
     saveLocal(); render();
     return `${fmtReal(used)} repartido en tus huchas`;
   });
-  split = wireSplit(f, huchas, ()=>k.pend);
-  if(hid) setTimeout(()=>{ const i=f.querySelector(`[name="sp_${hid}"]`); i&&i.select(); },40);
+  const draw = ()=>{
+    const hs = sorted(S.huchas).filter(h=>hCart(h)===cart);
+    const avail = Math.max(0, k.pendC[cart]);
+    const pre = hid ? {[hid]: avail} : null;
+    $("#split-wrap").innerHTML = `<div class="hint" style="margin-bottom:10px">Tienes <b class="num">${esc(fmtReal(avail))}</b> sin repartir en ${esc(cartName(cart).toLowerCase())}.</div>` +
+      (hs.length ? splitHTML(hs, pre) : `<div class="split"><div class="hint">No tienes huchas en ${esc(cartName(cart).toLowerCase())}. Crea una primero.</div></div>`);
+    split = wireSplit(f, hs, ()=>Math.max(0, k.pendC[cart]));
+    if(hid) setTimeout(()=>{ const i=f.querySelector(`[name="sp_${hid}"]`); i&&FINE&&i.select(); },40);
+  };
+  wireSegs(f, (_,v)=>{ cart=v; draw(); });
+  draw();
 }
 
-function sacarFields(huchas, sel, saldoTxt, m){
+function sacarFields(items, sel, saldoTxt, m){
   const dest = m ? (m.destino||"fuera") : "fuera";
   return `
-    <div class="field"><span class="fl">¿De qué hucha?</span>${pickerHTML("hucha", huchas, sel)}<div class="hint" id="f-saldo">${saldoTxt}</div></div>
+    <div class="field"><span class="fl">¿De qué hucha o cuenta?</span>${pickerHTML("hucha", items, sel)}<div class="hint" id="f-saldo">${saldoTxt}</div></div>
     <div class="field"><label for="f-imp">Importe</label><div class="money"><input class="inp num" id="f-imp" name="importe" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${m?toInput(m.importe):""}" ${m?"":"autofocus"}><span>€</span></div></div>
     <div class="field">${segHTML("destino", [{v:"fuera", l:"Lo gasto"},{v:"disponible", l:"Lo devuelvo a sin repartir"}], dest)}</div>
     <div class="field" id="f-cat-wrap" ${dest==="disponible"?"hidden":""}><span class="fl">¿En qué lo gastas? (opcional)</span>${catPicker(m&&m.categoria)}</div>
@@ -1412,15 +1594,17 @@ function sacarFields(huchas, sel, saldoTxt, m){
       <div class="field"><label for="f-nota">Nota (opcional)</label><input class="inp" id="f-nota" name="nota" placeholder="Ej. billetes de avión" maxlength="120" value="${m?esc(m.nota||""):""}"></div>
     </div>`;
 }
+const pickItems = (hs, withCart) => hs.map(h=>({id:h.id, color:h.color, nombre: withCart ? `${h.nombre} · ${cartName(hCart(h))}` : h.nombre}));
 function formSacar(hid){
-  const k = calc(); const huchas = sorted(S.huchas).filter(h=>(k.jar[h.id]||0)>0);
-  if(!huchas.length){ toast("Tus huchas están vacías."); return; }
-  const sel = hid && huchas.some(h=>h.id===hid) ? hid : (huchas.length===1?huchas[0].id:"");
-  const f = openSheet("Sacar dinero", "Saca dinero de una hucha.", sacarFields(huchas, sel, sel?`Hay ${esc(fmt(k.jar[sel]))}`:"", null), f=>{
+  const k = calc();
+  const hs = sorted(S.huchas).filter(h=>(k.jar[h.id]||0)>0 && (hid || view==="total" || hCart(h)===view));
+  if(!hs.length){ toast(view==="total" ? "Tus huchas están vacías." : `No tienes dinero en huchas de ${cartName(view).toLowerCase()}.`); return; }
+  const sel = hid && hs.some(h=>h.id===hid) ? hid : (hs.length===1?hs[0].id:"");
+  const f = openSheet("Sacar dinero", "Saca dinero de una hucha o cuenta.", sacarFields(pickItems(hs, view==="total" && !hid), sel, sel?`Hay ${esc(fmt(k.jar[sel]))}`:"", null), f=>{
     const h=f.hucha.value, imp=parse(f.importe.value);
-    if(!h) return "!Elige la hucha.";
+    if(!h) return "!Elige de dónde sacas el dinero.";
     if(!imp) return "!Escribe cuánto sacas.";
-    if(imp>(k.jar[h]||0)) return `!En esa hucha solo hay ${fmtReal(k.jar[h])}.`;
+    if(imp>(k.jar[h]||0)) return `!Ahí solo hay ${fmtReal(k.jar[h])}.`;
     const fuera = f.destino.value!=="disponible";
     put("movs", newId(), {tipo:"retirar", huchaId:h, importe:imp, destino:f.destino.value, categoria: fuera ? f.categoria.value : "", fecha:f.fecha.value||todayISO(), nota:f.nota.value.trim(), creado:Date.now()});
     return `${fmtReal(imp)} sacado`;
@@ -1429,19 +1613,59 @@ function formSacar(hid){
   wireSegs(f, (_,v)=>{ $("#f-cat-wrap").hidden = v==="disponible"; });
 }
 
+function traspasoFields(de, k, m){
+  return `
+    <div class="field"><span class="fl">¿Hacia dónde?</span>${segHTML("de", [{v:"tarjeta", l:`${cartName("tarjeta")} → ${cartName("efectivo")}`},{v:"efectivo", l:`${cartName("efectivo")} → ${cartName("tarjeta")}`}], de)}<div class="hint" id="f-disp">${k?`Tienes ${esc(fmtReal(Math.max(0,k.pendC[de])))} sin repartir en ${esc(cartName(de).toLowerCase())}.`:""}</div></div>
+    <div class="field"><label for="f-imp">Importe</label><div class="money"><input class="inp num" id="f-imp" name="importe" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${m?toInput(m.importe):""}" ${m?"":"autofocus"}><span>€</span></div></div>
+    <div class="row2">
+      <div class="field"><label for="f-fecha">Fecha</label><input class="inp" type="date" id="f-fecha" name="fecha" value="${m?esc(m.fecha):todayISO()}"></div>
+      <div class="field"><label for="f-nota">Nota (opcional)</label><input class="inp" id="f-nota" name="nota" placeholder="Ej. cajero" maxlength="120" value="${m?esc(m.nota||""):""}"></div>
+    </div>`;
+}
+function formTraspaso(){
+  const k = calc();
+  let de = view==="tarjeta" ? "tarjeta" : view==="efectivo" ? "efectivo" : (k.pendC.tarjeta>0 ? "tarjeta" : "efectivo");
+  const body = traspasoFields(de, k) + `<div class="hint tip-line">${ICON.swap}<span>Sacar del cajero es pasar de <b>${esc(cartName("tarjeta"))}</b> a <b>${esc(cartName("efectivo"))}</b>; ingresar billetes en el banco, al revés. Se mueve el dinero sin repartir.</span></div>`;
+  const f = openSheet("Mover dinero", "Entre efectivo y tarjeta.", body, f=>{
+    const imp = parse(f.importe.value), from = f.de.value;
+    if(!imp) return "!Escribe cuánto mueves.";
+    if(imp > Math.max(0,k.pendC[from])) return `!Solo tienes ${fmtReal(Math.max(0,k.pendC[from]))} sin repartir en ${cartName(from).toLowerCase()}. Saca antes dinero de una hucha si lo necesitas.`;
+    put("movs", newId(), {tipo:"traspaso", de:from, importe:imp, fecha:f.fecha.value||todayISO(), nota:f.nota.value.trim(), creado:Date.now()});
+    return `${fmtReal(imp)} movido a ${cartName(otherCart(from)).toLowerCase()}`;
+  });
+  wireSegs(f, (_,v)=>{ $("#f-disp").textContent = `Tienes ${fmtReal(Math.max(0,k.pendC[v]))} sin repartir en ${cartName(v).toLowerCase()}.`; });
+}
+function formInteres(hid){
+  const h = S.huchas.find(x=>x.id===hid); if(!h) return;
+  const k = calc(), v = Math.max(0, k.jar[h.id]||0), est = Math.round(v*(+h.tae||0)/100/12);
+  const body = `
+    <div class="hint tip-line">${ICON.pct}<span>Apunta lo que te ha pagado el banco. Con tu saldo y una TAE del ${esc(pctTxt(h.tae))}, son unos <b class="num">${esc(fmtReal(est))}</b> al mes.</span></div>
+    <div class="field"><label for="f-imp">Intereses recibidos</label><div class="money"><input class="inp num" id="f-imp" name="importe" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${toInput(est)}"><span>€</span></div></div>
+    <div class="row2">
+      <div class="field"><label for="f-fecha">Fecha</label><input class="inp" type="date" id="f-fecha" name="fecha" value="${todayISO()}"></div>
+      <div class="field"><label for="f-nota">Nota (opcional)</label><input class="inp" id="f-nota" name="nota" maxlength="120" value="${esc("Intereses de "+MES[new Date().getMonth()])}"></div>
+    </div>`;
+  openSheet(`Intereses · ${h.nombre}`, "", body, f=>{
+    const imp = parse(f.importe.value); if(!imp) return "!Escribe cuánto te ha pagado el banco.";
+    put("movs", newId(), {tipo:"interes", huchaId:h.id, importe:imp, fecha:f.fecha.value||todayISO(), nota:f.nota.value.trim(), creado:Date.now()});
+    return `${fmtReal(imp)} de intereses apuntados en ${h.nombre}`;
+  }, "", {okLabel:"Apuntar"});
+}
+
 function formMov(id){
   const m = S.movs.find(x=>x.id===id); if(!m) return;
-  const huchas = sorted(S.huchas), empresas = sorted(S.empresas), k = calc();
+  const huchas = sorted(S.huchas);
   let body, title, sub = "";
   if(m.tipo==="ingreso"){
     const pend = isPend(m);
-    const reparto = m.grupo ? S.movs.filter(x=>x.grupo===m.grupo && x.tipo==="asignar") : [];
-    const rep = reparto.reduce((s,x)=>s+(x.importe|0),0);
+    const rep = (m.grupo ? S.movs.filter(x=>x.grupo===m.grupo && x.tipo==="asignar") : []).reduce((s,x)=>s+(x.importe|0),0);
     title = pend ? "Editar factura pendiente" : "Editar cobro";
     if(rep) sub = `De este cobro repartiste ${esc(fmt(rep))} en huchas.`;
+    const items = cobroEmpresas(); if(m.empresaId && !items.some(e=>e.id===m.empresaId)) items.unshift({id:m.empresaId, nombre:"Empresa borrada", color:7});
     body = `
-      <div class="field"><span class="fl">Empresa</span>${pickerHTML("empresa", empresas.length?empresas:[{id:m.empresaId,nombre:"Empresa borrada",color:7}], m.empresaId)}</div>
+      <div class="field"><span class="fl">¿De dónde viene?</span>${pickerHTML("empresa", items, m.empresaId||"_otro")}</div>
       <div class="field">${segHTML("estado", ESTADOS, pend?"pendiente":"cobrado")}</div>
+      <div class="field"><span class="fl">¿Dónde lo recibes?</span>${cartSeg("cartera", mvCart(m))}</div>
       <div class="field"><label for="f-imp">Importe</label><div class="money"><input class="inp num" id="f-imp" name="importe" inputmode="decimal" autocomplete="off" value="${toInput(m.importe)}"><span>€</span></div></div>
       <div class="row2">
         <div class="field"><label for="f-fecha">Fecha</label><input class="inp" type="date" id="f-fecha" name="fecha" value="${esc(m.fecha)}"></div>
@@ -1451,7 +1675,19 @@ function formMov(id){
   } else if(m.tipo==="asignar"){
     title = "Editar reparto";
     body = `
-      <div class="field"><span class="fl">Hucha</span>${pickerHTML("hucha", huchas, m.huchaId)}</div>
+      <div class="field"><span class="fl">Hucha o cuenta</span>${pickerHTML("hucha", pickItems(huchas, true), m.huchaId)}</div>
+      <div class="field"><label for="f-imp">Importe</label><div class="money"><input class="inp num" id="f-imp" name="importe" inputmode="decimal" autocomplete="off" value="${toInput(m.importe)}"><span>€</span></div></div>
+      <div class="row2">
+        <div class="field"><label for="f-fecha">Fecha</label><input class="inp" type="date" id="f-fecha" name="fecha" value="${esc(m.fecha)}"></div>
+        <div class="field"><label for="f-nota">Nota (opcional)</label><input class="inp" id="f-nota" name="nota" maxlength="120" value="${esc(m.nota||"")}"></div>
+      </div>`;
+  } else if(m.tipo==="traspaso"){
+    title = "Editar movimiento de dinero";
+    body = traspasoFields(m.de==="tarjeta"?"tarjeta":"efectivo", null, m);
+  } else if(m.tipo==="interes"){
+    title = "Editar intereses";
+    body = `
+      <div class="field"><span class="fl">Cuenta</span>${pickerHTML("hucha", pickItems(huchas.filter(isCuenta).length?huchas.filter(isCuenta):huchas, false), m.huchaId)}</div>
       <div class="field"><label for="f-imp">Importe</label><div class="money"><input class="inp num" id="f-imp" name="importe" inputmode="decimal" autocomplete="off" value="${toInput(m.importe)}"><span>€</span></div></div>
       <div class="row2">
         <div class="field"><label for="f-fecha">Fecha</label><input class="inp" type="date" id="f-fecha" name="fecha" value="${esc(m.fecha)}"></div>
@@ -1459,19 +1695,21 @@ function formMov(id){
       </div>`;
   } else {
     title = "Editar salida de dinero";
-    body = sacarFields(huchas, m.huchaId, "", m);
+    body = sacarFields(pickItems(huchas, true), m.huchaId, "", m);
   }
   const foot = `<button type="button" class="btn btn-danger btn-del" id="f-del" aria-label="Borrar movimiento" title="Borrar">${ICON.trash}<span class="del-t">Borrar</span></button>`;
   const f = openSheet(title, sub, body, f=>{
     const imp = parse(f.importe.value); if(!imp) return "!Escribe un importe mayor que 0.";
     const ch = {importe:imp, fecha:f.fecha.value||m.fecha, nota:f.nota.value.trim()};
     if(m.tipo==="ingreso"){
-      ch.empresaId = f.empresa.value || m.empresaId; ch.clase = f.clase.value;
+      const ev = f.empresa.value || m.empresaId || "_otro"; ch.empresaId = ev==="_otro" ? "" : ev; ch.clase = f.clase.value; ch.cartera = f.cartera.value;
       const toPend = f.estado.value==="pendiente";
       if(toPend && m.grupo && S.movs.some(x=>x.grupo===m.grupo && x.tipo==="asignar")) return "!Este cobro ya tiene dinero repartido en huchas. Borra ese reparto antes de marcarlo como pendiente.";
       ch.estado = toPend ? "pendiente" : "cobrado";
-    } else if(m.tipo==="asignar"){
-      if(!f.hucha.value) return "!Elige la hucha."; ch.huchaId = f.hucha.value;
+    } else if(m.tipo==="asignar" || m.tipo==="interes"){
+      if(!f.hucha.value) return "!Elige la hucha o cuenta."; ch.huchaId = f.hucha.value;
+    } else if(m.tipo==="traspaso"){
+      ch.de = f.de.value;
     } else {
       if(!f.hucha.value) return "!Elige la hucha."; ch.huchaId = f.hucha.value; ch.destino = f.destino.value;
       ch.categoria = ch.destino==="disponible" ? "" : f.categoria.value;
@@ -1483,7 +1721,6 @@ function formMov(id){
   }, foot);
   wirePickers(f); wireSegs(f, (name,v)=>{ if(name==="destino") $("#f-cat-wrap").hidden = v==="disponible"; });
   $("#f-del").addEventListener("click", ()=>{ closeSheet(); deleteMov(m.id); });
-  void k;
 }
 
 function deleteMov(id){
@@ -1498,7 +1735,8 @@ function deleteMov(id){
 function markCobrado(id){
   const m = S.movs.find(x=>x.id===id); if(!m) return;
   put("movs", m.id, {...m, estado:"cobrado", fechaEmision:m.fecha, fecha:todayISO()});
-  toast(`¡Cobrados ${fmtReal(m.importe)}! Ya puedes repartirlos.`, {label:"Repartir", fn:()=>formRepartir()}, 7000);
+  const c = mvCart(m);
+  toast(`¡Cobrados ${fmtReal(m.importe)} en ${cartName(c).toLowerCase()}!`, {label:"Repartir", fn:()=>{ goView(c, false); formRepartir(); }}, 7000);
 }
 
 function formEmpresa(id, thenCobro){
@@ -1519,27 +1757,53 @@ function formEmpresa(id, thenCobro){
   const d = f.querySelector("#f-del"); if(d) d.addEventListener("click", ()=>{ closeSheet(); del("empresas", e.id); toast("Empresa eliminada", {label:"Deshacer", fn:()=>put("empresas", e.id, e)}); });
 }
 
-function formHucha(id){
+function hNet(id){ let n=0; for(const m of S.movs){ if(m.huchaId!==id) continue; if(m.tipo==="asignar") n+=m.importe|0; else if(m.tipo==="retirar" && m.destino==="disponible") n-=m.importe|0; } return n; }
+function formHucha(id, defCart, asCuenta){
   const h = id ? S.huchas.find(x=>x.id===id) : null; const k = calc();
+  const cuenta = h ? isCuenta(h) : !!asCuenta;
+  const cart = h ? hCart(h) : (cuenta ? "tarjeta" : (CARTS.includes(defCart) ? defCart : (view!=="total" ? view : "efectivo")));
   const saldo = h ? (k.jar[h.id]||0) : 0;
-  const body = `
+  const pool = S.huchas.filter(x=>isCuenta(x)===cuenta);
+  const body = cuenta ? `
+    <div class="field"><label for="f-nom">Nombre de la cuenta</label><input class="inp" id="f-nom" name="nombre" value="${esc(h?h.nombre:"")}" placeholder="Ej. Cuenta remunerada" maxlength="40" autofocus></div>
+    <div class="row2">
+      <div class="field"><label for="f-banco">Banco (opcional)</label><input class="inp" id="f-banco" name="banco" value="${esc(h&&h.banco||"")}" placeholder="Ej. Mi banco" maxlength="40"></div>
+      <div class="field"><label for="f-tae">TAE (%)</label><div class="money sm"><input class="inp num" id="f-tae" name="tae" inputmode="decimal" autocomplete="off" placeholder="2,5" value="${h&&h.tae!=null?esc(String(h.tae).replace(".",",")):""}"><span>%</span></div></div>
+    </div>
+    <div class="hint tip-line">${ICON.pct}<span>La TAE es el interés anual que te paga el banco. Con ella la app calcula cuánto te genera la cuenta al mes y al año (antes de impuestos).</span></div>
+    <div class="field"><span class="fl">Color</span>${swatchHTML(h?h.color|0:nextColor(pool))}</div>` : `
     <div class="field"><label for="f-nom">Nombre de la hucha</label><input class="inp" id="f-nom" name="nombre" value="${esc(h?h.nombre:"")}" placeholder="Ej. Viaje a Japón" maxlength="40" autofocus></div>
+    <div class="field"><span class="fl">¿Dónde está este dinero?</span>${cartSeg("cartera", cart)}</div>
     <div class="row2">
       <div class="field"><label for="f-obj">Meta (opcional)</label><div class="money sm"><input class="inp num" id="f-obj" name="objetivo" inputmode="decimal" autocomplete="off" placeholder="Sin meta" value="${esc(h&&h.objetivo?toInput(h.objetivo):"")}"><span>€</span></div></div>
       <div class="field"><label for="f-fecha">Fecha límite (opcional)</label><input class="inp" type="date" id="f-fecha" name="fecha" min="${todayISO()}" value="${esc(h&&h.fecha||"")}"></div>
     </div>
     <div class="hint tip-line">${ICON.clock}<span>Con meta y fecha, la hucha te dirá cuánto meter cada mes para llegar a tiempo.</span></div>
-    <div class="field"><span class="fl">Color</span>${swatchHTML(h?h.color|0:nextColor(S.huchas))}</div>`;
-  const foot = h ? (saldo>0 ? `<span class="hint">Saca los ${esc(fmt(saldo))} para poder eliminarla.</span>` : `<button type="button" class="btn btn-danger" id="f-del">Eliminar</button>`) : "";
-  const f = openSheet(h?"Editar hucha":"Nueva hucha", "", body, f=>{
-    const nombre=f.nombre.value.trim(); if(!nombre) return "!Ponle un nombre a la hucha.";
-    const objetivo = parse(f.objetivo.value), fecha = f.fecha.value || "";
+    <div class="field"><span class="fl">Color</span>${swatchHTML(h?h.color|0:nextColor(pool))}</div>`;
+  const what = cuenta ? "la cuenta" : "la hucha";
+  const foot = h ? (saldo>0 ? `<span class="hint">Saca los ${esc(fmt(saldo))} para poder eliminar ${what}.</span>` : `<button type="button" class="btn btn-danger" id="f-del">Eliminar</button>`) : "";
+  const f = openSheet(h ? (cuenta?"Editar cuenta de ahorro":"Editar hucha") : (cuenta?"Nueva cuenta de ahorro":"Nueva hucha"), cuenta && !h ? "Dinero en el banco que te da intereses." : "", body, f=>{
+    const nombre = f.nombre.value.trim(); if(!nombre) return `!Ponle un nombre a ${what}.`;
+    const hid = h ? h.id : newId();
+    if(cuenta){
+      const tae = parseFloat(String(f.tae.value).replace(",", "."));
+      if(!(tae>=0 && tae<100)) return "!Escribe la TAE de la cuenta, por ejemplo 2,5.";
+      put("huchas", hid, {nombre, tipo:"cuenta", cartera:"tarjeta", banco:f.banco.value.trim(), tae:Math.round(tae*100)/100, objetivo:0, fecha:"", color:+f.color.value, creado:h?h.creado:Date.now()});
+      return h ? "Cuenta actualizada" : `Cuenta ${nombre} añadida`;
+    }
+    const objetivo = parse(f.objetivo.value), fecha = f.fecha.value || "", nc = f.cartera.value==="tarjeta" ? "tarjeta" : "efectivo";
     if(fecha && !objetivo) return "!Para usar una fecha límite, pon también una meta.";
-    put("huchas", h?h.id:newId(), {nombre, objetivo, fecha, color:+f.color.value, creado:h?h.creado:Date.now()});
-    return h ? "Hucha actualizada" : `Hucha ${nombre} creada`;
+    let moved = 0;
+    if(h && hCart(h)!==nc){
+      const n = hNet(h.id);
+      if(n){ moved = n; S.movs.push({id:newId(), tipo:"traspaso", de: n>0 ? hCart(h) : nc, importe:Math.abs(n), fecha:todayISO(), nota:`Hucha «${nombre}» pasada a ${cartName(nc).toLowerCase()}`, auto:true, creado:Date.now()}); }
+    }
+    put("huchas", hid, {...(h||{}), nombre, objetivo, fecha, cartera:nc, color:+f.color.value, creado:h?h.creado:Date.now()});
+    if(moved) return `Hucha pasada a ${cartName(nc).toLowerCase()} con su dinero`;
+    return h ? "Hucha actualizada" : `Hucha ${nombre} creada en ${cartName(nc).toLowerCase()}`;
   }, foot);
-  wireSwatch(f);
-  const d = f.querySelector("#f-del"); if(d) d.addEventListener("click", ()=>{ closeSheet(); del("huchas", h.id); toast("Hucha eliminada", {label:"Deshacer", fn:()=>put("huchas", h.id, h)}); });
+  wireSwatch(f); wireSegs(f);
+  const d = f.querySelector("#f-del"); if(d) d.addEventListener("click", ()=>{ closeSheet(); del("huchas", h.id); toast(cuenta?"Cuenta eliminada":"Hucha eliminada", {label:"Deshacer", fn:()=>put("huchas", h.id, h)}); });
 }
 
 /* ---------- ayuda + novedades ---------- */
@@ -1547,6 +1811,7 @@ function formAyuda(){
   const sec = (ic, t, html, open) => `<details class="hlp" ${open?"open":""}><summary><span class="hic">${ic}</span>${t}</summary><div class="hbody">${html}</div></details>`;
   const body = `<div class="help">
     ${sec(ICON.jar, "La idea en 30 segundos", `<p>Tu hucha funciona en tres pasos:</p><ol><li><b>Apuntas lo que cobras</b> en cada empresa.</li><li>Ese dinero queda como <b>Sin repartir</b> (el número amarillo de arriba).</li><li><b>Lo repartes en huchas</b>: cada hucha es un bote con un objetivo (colchón, viajes, coche…).</li></ol><p>El número grande es lo que tienes ahorrado entre todas tus huchas.</p>`, true)}
+    ${sec(ICON.cash, "Efectivo, tarjeta y cuentas de ahorro", `<p>Arriba ves <b>tu dinero total</b>. <b>Desliza</b> el bloque de color (o toca las pestañas) para ver solo lo que tienes en <b>efectivo</b> o en <b>tarjeta</b>; las huchas de debajo cambian contigo.</p><p>Al añadir un cobro eliges <b>dónde lo recibes</b>. Cada hucha está en efectivo o en tarjeta (puedes cambiarla editándola: su dinero se mueve con ella).</p><p>En tarjeta puedes añadir <b>cuentas de ahorro</b> con su <b>TAE</b>: la app calcula cuánto te generan al mes y al año, y con <b>Intereses</b> apuntas lo que te paga el banco. Con <b>Mover</b> pasas dinero entre efectivo y tarjeta, por ejemplo al sacar del cajero.</p><p>Puedes renombrar «Efectivo» y «Tarjeta» en <b>Ajustes</b>.</p>`)}
     ${sec(ICON.inc, "Empresas y cobros", `<p>En <b>Empresas</b> añades los sitios donde trabajas, cada uno con su color. Pulsa <b>Añadir cobro</b> (o el <b>+</b> de una empresa) y escribe el importe neto, la fecha y el tipo (nómina, factura…).</p><p>En el mismo paso puedes repartirlo en tus huchas, o dejarlo para más tarde.</p><p>El gráfico <b>Cobros por mes</b> enseña los últimos 6 meses, un color por empresa. Toca una barra para ver el detalle.</p>`)}
     ${sec(ICON.clock, "Facturas pendientes de cobro", `<p>Si emites una factura y aún no te han pagado, al añadir el cobro elige <b>Pendiente de cobro</b>. Arriba verás <b>Te deben</b> con el total.</p><p>Cuando te paguen, pulsa <b>Cobrado</b> en ese movimiento: pasa a tu dinero sin repartir y podrás repartirlo.</p>`)}
     ${sec(ICON.rule, "Repartir y reglas de reparto", `<p>Al repartir escribes cuánto va a cada hucha. Tienes atajos: <b>A partes iguales</b> y <b>Vaciar</b>.</p><p>Si siempre repartes igual, crea una <b>regla</b> en <b>Tus huchas → Reglas de reparto</b>, por ejemplo 50 % Colchón, 30 % Viajes, 20 % Inversión. Después, al añadir un cobro, toca la regla y se rellenan los importes solos. Lo que no sume 100 % se queda sin repartir.</p>`)}
@@ -1564,14 +1829,11 @@ function showNews(){
   try{ localStorage.setItem(NEWS_KEY, "1"); }catch(e){}
   const it = (ic, c, t, d) => `<li style="--c:var(--${c})"><span class="nic">${ic}</span><div><b>${t}</b><span>${d}</span></div></li>`;
   const body = `<ul class="news">
-    ${it(ICON.edit, "c0", "Corrige movimientos", "Toca cualquier movimiento para editarlo.")}
-    ${it(ICON.trash, "c1", "Deshacer al borrar", "¿Borraste sin querer? Pulsa «Deshacer».")}
-    ${it(ICON.clock, "c2", "Metas con fecha", "Te decimos cuánto meter al mes para llegar.")}
-    ${it(ICON.rule, "c4", "Reglas de reparto", "Guarda tu 50/30/20 y aplícalo con un toque.")}
-    ${it(ICON.inc, "c3", "Facturas pendientes", "Apunta lo que te deben y márcalo al cobrar.")}
-    ${it(ICON.tag, "c5", "Categorías de gasto", "Descubre en qué se va tu dinero.")}
-    ${it(ICON.party, "c7", "Hazla tuya", "Icono, frase, 10 colores, modo oscuro y más en Ajustes.")}
-    ${it(ICON.eye, "c6", "Y además", "Filtros por empresa y mes, ocultar importes, comparativa mensual y celebraciones.")}
+    ${it(ICON.cash, "c3", "Efectivo y tarjeta", "Arriba ves tu dinero total. Desliza para ver efectivo y tarjeta por separado.")}
+    ${it(ICON.bank, "c2", "Cuentas de ahorro", "Añade tus cuentas con su TAE y mira cuánto te generan al mes y al año.")}
+    ${it(ICON.swap, "c6", "Mover dinero", "Del banco al bolsillo (cajero) o al revés, con un toque.")}
+    ${it(ICON.jar, "c0", "Huchas en las dos", "Tus huchas siguen en efectivo y puedes crear otras en tarjeta.")}
+    ${it(ICON.edit, "c4", "Todo editable", "Cambia de dónde viene cada cobro, pasa una hucha de efectivo a tarjeta o renombra tus carteras en Ajustes.")}
   </ul>`;
   openSheet("Novedades de tu hucha", "Lo nuevo de esta actualización, en un vistazo.", body, null, `<button type="button" class="btn btn-soft" id="news-help">${ICON.help}Cómo funciona</button>`, {noSubmit:true, noFocus:true, closeLabel:"¡Vamos!"});
   $("#news-help").addEventListener("click", ()=>formAyuda());
@@ -1593,7 +1855,10 @@ document.addEventListener("click", e=>{
     case "cobro": formCobro(id); break;
     case "repartir": formRepartir(id); break;
     case "sacar": formSacar(id); break;
-    case "hucha-new": formHucha(null); break;
+    case "hucha-new": formHucha(null, b.dataset.cart); break;
+    case "cuenta-new": formHucha(null, "tarjeta", true); break;
+    case "traspaso": formTraspaso(); break;
+    case "interes": formInteres(id); break;
     case "hucha-edit": formHucha(id); break;
     case "empresa-new": formEmpresa(null); break;
     case "empresa-edit": formEmpresa(id); break;
@@ -1641,7 +1906,7 @@ const PERFIL_KEY = "hucha-perfil";
 const THEMES = { azul:"#2232E6", indigo:"#3730A3", morado:"#6B2FD6", rosa:"#C2185B", granate:"#9F1239", coral:"#D2412E", cafe:"#7C4A1E", verde:"#0B7A5A", turquesa:"#0F766E", noche:"#1B1E3A" };
 const THEME_NAMES = { azul:"Azul", indigo:"Índigo", morado:"Morado", rosa:"Rosa", granate:"Granate", coral:"Coral", cafe:"Café", verde:"Verde", turquesa:"Turquesa", noche:"Noche" };
 const EMOJIS = ["🐷","💰","💎","🚀","✈️","🌴","🏠","🚗","🎮","⚽","🎸","🌟","🍀","🐶","🐱","🦊"];
-const PDEF = { tema:"azul", emoji:"", frase:"", modo:"auto", privInicio:false, autoLock:2, ocultar:{} };
+const PDEF = { tema:"azul", emoji:"", frase:"", modo:"auto", privInicio:false, autoLock:2, ocultar:{}, nombreEf:"", nombreTa:"", cartDef:"efectivo" };
 const pget = k => (perfil && perfil[k]!=null) ? perfil[k] : PDEF[k];
 let lockIcDefault = "";
 let perfil = null;
@@ -1678,6 +1943,13 @@ function formAjustes(welcome){
       <div class="field"><span class="fl">Tu icono</span><div class="emojis" id="f-emojis"><button type="button" data-e="" aria-pressed="${!emo}" aria-label="Sin icono" class="none">—</button>${EMOJIS.map(e=>`<button type="button" data-e="${e}" aria-pressed="${e===emo}">${e}</button>`).join("")}</div><input type="hidden" name="emoji" value="${esc(emo)}"></div>
       <div class="field"><label for="f-frase">Tu frase (opcional)</label><input class="inp" id="f-frase" name="frase" maxlength="60" value="${esc(pget("frase"))}" placeholder="Ej. Ahorrando para mi viaje a Japón"><span class="hint">Sale debajo de tu saludo, para recordarte para qué ahorras.</span></div>
     </div>
+    <div class="aj-sec"><h3>Tu dinero</h3>
+      <div class="row2">
+        <div class="field"><label for="f-nef">Nombre para efectivo</label><input class="inp" id="f-nef" name="nombreEf" maxlength="16" value="${esc(pget("nombreEf"))}" placeholder="Efectivo"></div>
+        <div class="field"><label for="f-nta">Nombre para tarjeta</label><input class="inp" id="f-nta" name="nombreTa" maxlength="16" value="${esc(pget("nombreTa"))}" placeholder="Tarjeta"></div>
+      </div>
+      <div class="field"><span class="fl">Al añadir un cobro desde «Total», guardarlo en</span>${segHTML("cartDef", [{v:"efectivo",l:"Efectivo"},{v:"tarjeta",l:"Tarjeta"}], pget("cartDef"))}</div>
+    </div>
     <div class="aj-sec"><h3>Aspecto</h3>
       <div class="field"><span class="fl">Color de tu hucha</span><div class="themes" id="f-themes">${themeButtons(sel)}</div><input type="hidden" name="tema" value="${sel}"></div>
       <div class="field"><span class="fl">Modo</span>${segHTML("modo", [{v:"auto",l:"Automático"},{v:"claro",l:"Claro"},{v:"oscuro",l:"Oscuro"}], pget("modo"))}</div>
@@ -1691,7 +1963,7 @@ function formAjustes(welcome){
       ${sw("verGas", "¿En qué se va tu dinero?", "", !oc.gastos)}
     </div>`;
   const foot = welcome ? "" : `<button type="button" class="btn btn-soft" id="f-pw">Cambiar contraseña</button>`;
-  const read = f => ({ tema:f.tema.value, emoji:f.emoji.value, frase:f.frase.value.trim(), modo:f.modo.value, privInicio:f.privInicio.checked, autoLock:+f.autoLock.value, ocultar:{empresas:!f.verEmp.checked, gastos:!f.verGas.checked} });
+  const read = f => ({ tema:f.tema.value, emoji:f.emoji.value, frase:f.frase.value.trim(), modo:f.modo.value, nombreEf:f.nombreEf.value.trim(), nombreTa:f.nombreTa.value.trim(), cartDef:f.cartDef.value, privInicio:f.privInicio.checked, autoLock:+f.autoLock.value, ocultar:{empresas:!f.verEmp.checked, gastos:!f.verGas.checked} });
   const f = openSheet(welcome ? "¡Bienvenido!" : "Ajustes", welcome ? "Dinos tu nombre y deja tu hucha a tu gusto. Puedes cambiarlo cuando quieras." : "Deja tu hucha a tu gusto.", body, f=>{
     const nombre = f.nombre.value.trim(); if(!nombre) return "!Escribe tu nombre.";
     savePerfil({...PDEF, ...(perfil||{}), ...read(f), nombre}); render();
@@ -1735,6 +2007,7 @@ function showLock(state, msg){
 function unlock(isNew){
   lockState="open"; fails=0; $("#lock").hidden = true; $("#app").hidden = false; $("#fab").hidden = false;
   if(pget("privInicio")) priv = true;
+  view = "total"; const scv = $("#vslides"); if(scv) scv.scrollLeft = 0;
   celebReady = false; render(); celebReady = true;
   if(isNew){ markNewsSeen(); return; }
   if(!perfil || !perfil.nombre) setTimeout(()=>formAjustes(true), 200);
@@ -1818,6 +2091,7 @@ try{ const io = new IntersectionObserver(es=>{ $("#fab").classList.toggle("off",
 
 /* ---------- boot ---------- */
 loadLocal();
+setupCarousel();
 initLock();
 render();
 if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
