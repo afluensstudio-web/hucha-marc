@@ -637,7 +637,8 @@ select.inp{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;pa
 @media (max-width:420px){ .row2{grid-template-columns:minmax(0,1fr)} }
 @media (max-width:600px){
   .sheet-p{max-height:calc(100% - 12px)}
-  .sheet-f{flex-wrap:nowrap;gap:8px}
+  .sheet-f{flex-wrap:wrap;gap:8px}
+  .sheet-f > .hint{flex:1 1 100%}
   .sheet-f .btn-del{flex:0 0 48px;width:48px;padding:0;justify-content:center;align-self:stretch;min-height:44px;border-radius:12px}
   .sheet-f .btn-del .del-t{display:none}
   .sheet-f .btn-danger:not(.btn-del){flex:0 1 auto}
@@ -678,7 +679,7 @@ select.inp{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;pa
 .acct .jar-btns .btn{padding:9px 8px}
 .acct .jar-btns svg{width:16px;height:16px}
 .acct-empty{grid-column:1/-1}
-#cuentas .jar-new{min-height:110px}
+#cuentas .jar-new,#plazos .jar-new{min-height:110px}
 @media (max-width:560px){
   .vslides{margin-inline:-18px}
   .vslide{padding-inline:18px}
@@ -688,6 +689,21 @@ select.inp{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;pa
   .acct .jar-btns .btn{font-size:13px}
 }
 @media (max-width:340px){ .top-r .hb,.top-r .icon-btn{width:34px;height:34px} .top-r{gap:4px} .news-btn{height:34px;padding:0 8px;font-size:12px} .actions{grid-template-columns:repeat(3,minmax(0,1fr))} .actions .btn{font-size:13px;padding:11px 4px} }
+
+/* ---- compras a plazos (v6) ---- */
+.plz-lbl{font-size:12.5px;color:var(--muted);margin-bottom:2px}
+.plazo .jar-btns .btn-sun{flex:1;justify-content:center}
+.plazo.st-done{opacity:.85}
+.plazo .prog span{background:var(--c)}
+.pill.late{background:color-mix(in srgb, var(--bad) 16%, transparent);color:var(--bad)}
+.pill.soon{background:color-mix(in srgb, var(--c3) 22%, transparent);color:var(--ink)}
+.pill.ok{background:color-mix(in srgb, var(--good) 16%, transparent);color:var(--good)}
+.plazo .pill{margin-left:0;white-space:nowrap}
+.late-t{color:var(--bad)}
+.convert-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface-2);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--muted)}
+.convert-row svg{width:16px;height:16px;flex:none}
+.convert-row .link{padding:2px 0}
+#plz-sum svg{color:var(--vault)}
 </style>
 </head>
 <body>
@@ -770,6 +786,14 @@ select.inp{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;pa
     <div class="grid" id="cuentas"></div>
   </section>
 
+  <section class="sec" id="sec-plazos" aria-labelledby="h-plazos">
+    <div class="sec-h">
+      <div><h2 id="h-plazos">Compras a plazos</h2><p id="h-plazos-p">Lo que estás pagando a meses, con su cuenta atrás.</p></div>
+      <button class="link" data-act="plazo-new">+ Nueva compra</button>
+    </div>
+    <div class="grid" id="plazos"></div>
+  </section>
+
   <section class="sec" id="sec-emp" aria-labelledby="h-emp">
     <div class="sec-h">
       <div><h2 id="h-emp">Empresas</h2><p>Lo que cobras en cada sitio donde trabajas.</p></div>
@@ -804,6 +828,7 @@ select.inp{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;pa
         <button class="chip" data-f="pendiente" aria-pressed="false">Pendientes</button>
         <button class="chip" data-f="asignar" aria-pressed="false">A huchas</button>
         <button class="chip" data-f="retirar" aria-pressed="false">Sacado</button>
+        <button class="chip" data-f="cuota" aria-pressed="false">Plazos</button>
       </div>
       <label class="sr" for="f-emp">Filtrar por empresa</label><select class="sel" id="f-emp"></select>
       <label class="sr" for="f-mes">Filtrar por mes</label><select class="sel" id="f-mes"></select>
@@ -823,10 +848,10 @@ select.inp{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;pa
 <script>
 (function(){
 "use strict";
-const COLS = ["empresas","huchas","movs","reglas"];
+const COLS = ["empresas","huchas","movs","reglas","plazos"];
 const CORE = ["empresas","huchas","movs"];
 const LS_KEY = "hucha-marc-v1";
-const S = { empresas:[], huchas:[], movs:[], reglas:[] };
+const S = { empresas:[], huchas:[], movs:[], reglas:[], plazos:[] };
 let filter = "all", filterEmp = "", filterMes = "", showAll = false, gastoPer = "mes";
 let priv = false; try{ priv = localStorage.getItem("hucha-privado")==="1"; }catch(e){}
 const NEWS_KEY = "hucha-novedades-v5", NEWS_UNTIL = "2026-12-09";
@@ -882,6 +907,7 @@ const ICON = {
   rule:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M12 12l7-5M12 12l-7-5M12 12l6 6M12 12l-6 6"/></svg>',
   tag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg>',
   filter:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6 7.5V19l-4 1.5v-8L4 5z"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg>',
   cash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg>',
   card:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6.5 15h4"/></svg>',
   bank:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M5 10v7M9.5 10v7M14.5 10v7M19 10v7M3 20h18"/></svg>',
@@ -905,7 +931,7 @@ const pctTxt = n => (+n||0).toLocaleString("es-ES",{maximumFractionDigits:2}) + 
 
 /* ---------- derived numbers ---------- */
 function calc(movs = S.movs){
-  const jar = {}, emp = {}, pendC = {efectivo:0, tarjeta:0};
+  const jar = {}, emp = {}, pendC = {efectivo:0, tarjeta:0}, plazoPaid = {};
   let deben=0, mes=0, prev=0, ano=0, interesAno=0;
   const cur = ymNow(), prv = shiftYM(cur,-1), y = cur.slice(0,4);
   const hmap = {}; for(const h of S.huchas) hmap[h.id]=h;
@@ -928,6 +954,8 @@ function calc(movs = S.movs){
     } else if(mv.tipo==="interes"){
       jar[mv.huchaId]=(jar[mv.huchaId]||0)+a;
       if(ymOf(mv.fecha).startsWith(y)) interesAno+=a;
+    } else if(mv.tipo==="cuota"){
+      pendC[mvCart(mv)] -= a; plazoPaid[mv.plazoId] = (plazoPaid[mv.plazoId]||0) + a;
     } else if(mv.tipo==="traspaso"){
       const de = mv.de==="tarjeta" ? "tarjeta" : "efectivo";
       pendC[de]-=a; pendC[otherCart(de)]+=a;
@@ -938,7 +966,7 @@ function calc(movs = S.movs){
   const totalC = { efectivo: pendC.efectivo + huchasC.efectivo, tarjeta: pendC.tarjeta + huchasC.tarjeta + cuentas };
   const pend = pendC.efectivo + pendC.tarjeta, total = totalC.efectivo + totalC.tarjeta;
   const [cy,cm] = cur.split("-").map(Number);
-  return { jar, emp, pend, pendC, huchasC, cuentas, totalC, total, interesEst, interesAno, mes, prev, ano, deben, monthName: MES[cm-1], prevName: MES[(cm+10)%12], year:cy };
+  return { jar, emp, plazoPaid, pend, pendC, huchasC, cuentas, totalC, total, interesEst, interesAno, mes, prev, ano, deben, monthName: MES[cm-1], prevName: MES[(cm+10)%12], year:cy };
 }
 
 /* ---------- celebrations ---------- */
@@ -983,6 +1011,138 @@ function confetti(n){
   })(t0);
 }
 
+/* ---------- compras a plazos ---------- */
+const activeH = () => S.huchas.filter(h=>!h.archivada);
+const dayMonth = d => d.toLocaleDateString("es-ES",{day:"numeric", month:"short"}).replace(".","");
+function plazoInfo(p, k){
+  const paidMovs = (k.plazoPaid && k.plazoPaid[p.id]) || 0;
+  const total = p.total|0, cuota = Math.max(1, p.cuota|0);
+  const paid = (p.pagadoInicial|0) + paidMovs;
+  const resta = Math.max(0, total - paid);
+  const cuotasRest = resta ? Math.ceil(resta/cuota) : 0;
+  const cuotasTot = Math.max(1, Math.ceil(total/cuota));
+  const cuotaN = Math.min(cuotasTot, cuotasTot - cuotasRest);
+  const dia = Math.min(28, Math.max(1, p.dia|0 || 1));
+  const cur = ymNow(), today = dateOf(todayISO());
+  const paidThisMonth = S.movs.some(m=>m.tipo==="cuota" && m.plazoId===p.id && ymOf(m.fecha)===cur);
+  const ini = dateOf(p.inicio || todayISO());
+  const firstDue = new Date(ini.getFullYear(), ini.getMonth() + (ini.getDate() > dia ? 1 : 0), dia);
+  let next = new Date(today.getFullYear(), today.getMonth() + (paidThisMonth ? 1 : 0), dia);
+  if(next < firstDue) next = firstDue;
+  const daysTo = Math.round((next - today)/86400000);
+  let status = "ok";
+  if(!resta) status = "done";
+  else if(daysTo < 0) status = "late";
+  else if(daysTo <= 5) status = "soon";
+  const fin = resta ? new Date(next.getFullYear(), next.getMonth() + cuotasRest - 1, dia) : null;
+  return { paid, total, cuota, resta, cuotasRest, cuotasTot, cuotaN, dia, next, daysTo, status, fin, pct: total ? Math.min(100, paid/total*100) : 0, paidThisMonth };
+}
+function plazoSummary(k){
+  let debe = 0, mensual = 0, n = 0; const byCart = {efectivo:0, tarjeta:0};
+  for(const p of S.plazos){ const i = plazoInfo(p, k); if(!i.resta) continue; n++; debe += i.resta; const c = Math.min(i.cuota, i.resta); mensual += c; byCart[p.cartera==="efectivo"?"efectivo":"tarjeta"] += c; }
+  return { debe, mensual, n, byCart };
+}
+function plazoCard(p, k){
+  const i = plazoInfo(p, k), cart = p.cartera==="efectivo" ? "efectivo" : "tarjeta";
+  const pill = i.status==="done" ? `<span class="pill ok">Pagado</span>`
+    : i.status==="late" ? `<span class="pill late">Pago pendiente</span>`
+    : i.status==="soon" ? `<span class="pill soon">${i.daysTo===0?"Paga hoy":`Paga en ${i.daysTo} ${i.daysTo===1?"día":"días"}`}</span>` : "";
+  const when = i.status==="late" ? `Desde el ${esc(dayMonth(i.next))}` : (i.daysTo===0 ? "Hoy" : esc(dayMonth(i.next)));
+  return `<article class="jar plazo st-${i.status}" style="--c:${color(p.color)}">
+    <div class="jar-top"><span class="acct-ic">${ICON.cal}</span><div class="acct-n"><h3>${esc(p.nombre)}</h3><small>${esc(fmt(i.cuota))}/mes · ${esc(cartName(cart))}</small></div>${pill}<button class="edit" data-act="plazo-edit" data-id="${esc(p.id)}" aria-label="Editar ${esc(p.nombre)}">${ICON.edit}</button></div>
+    <div class="jar-body">
+      ${i.resta ? `<div><div class="plz-lbl">Te quedan por pagar</div><div class="jar-amt num">${esc(fmt(i.resta))}</div></div>` : `<div class="plan done">${ICON.check}<span><b>¡Terminado de pagar!</b><small>${esc(fmt(i.total))} en total</small></span></div>`}
+      <div><div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(i.pct)}" aria-label="Pagado"><span style="width:${i.pct}%"></span></div>
+        <div class="prog-l" style="margin-top:6px"><span>Pagado <b class="num">${esc(fmt(i.paid))}</b> de ${esc(fmt(i.total))}</span><span class="num">${Math.round(i.pct)}%</span></div></div>
+      ${i.resta ? `<div class="acct-int"><div><small>Próximo pago</small><b class="${i.status==="late"?"late-t":""}">${when}</b></div><div><small>Cuotas que quedan</small><b class="num">${i.cuotasRest}</b></div><div><small>Terminas en</small><b>${esc(MES_C[i.fin.getMonth()])} ${i.fin.getFullYear()}</b></div></div>
+      <div class="jar-btns"><button class="btn btn-sun" data-act="plazo-pay" data-id="${esc(p.id)}">${ICON.check}Pagar cuota</button></div>` : ""}
+    </div></article>`;
+}
+function renderPlazos(k){
+  const list = sorted(S.plazos).filter(p=>view==="total" || (p.cartera==="efectivo"?"efectivo":"tarjeta")===view);
+  const sum = plazoSummary(k);
+  $("#h-plazos-p").textContent = sum.n ? `Debes ${fmt(sum.debe)} y pagas ${fmt(sum.mensual)} al mes.` : "Lo que estás pagando a meses, con su cuenta atrás.";
+  const hint = activeH().some(h=>!isCuenta(h)) ? `<span class="hint">¿Tenías una hucha para esto? Edítala y pulsa «Convertir en compra a plazos».</span>` : "";
+  const order = (a,b)=>{ const ia=plazoInfo(a,k), ib=plazoInfo(b,k); const r=s=>({late:0,soon:1,ok:2,done:3})[s]; return r(ia.status)-r(ib.status) || ia.daysTo-ib.daysTo; };
+  $("#plazos").innerHTML = list.length
+    ? list.sort(order).map(p=>plazoCard(p,k)).join("") + `<button class="jar-new" data-act="plazo-new"><div><div class="plus">+</div>Añadir compra a plazos</div></button>`
+    : `<div class="empty panel acct-empty"><strong>¿Pagas algo a meses?</strong><span>Añade la compra (por ejemplo, el móvil) con su precio y su cuota, y verás la cuenta atrás hasta terminar de pagarla.</span>${hint}<button class="btn btn-ink" data-act="plazo-new">${ICON.plus}Añadir compra a plazos</button></div>`;
+}
+
+function formPlazo(id, fromHucha){
+  const p = id ? S.plazos.find(x=>x.id===id) : null; const k = calc();
+  const src = fromHucha ? S.huchas.find(x=>x.id===fromHucha) : null;
+  const srcSaldo = src ? Math.max(0, k.jar[src.id]||0) : 0;
+  const v = p || { nombre: src ? src.nombre : "", total:0, cuota:0, pagadoInicial:0, dia:new Date().getDate()>28?28:new Date().getDate(), cartera: "tarjeta", inicio: todayISO(), color: src ? src.color : nextColor(S.plazos) };
+  const body = `
+    ${src ? `<div class="hint tip-line">${ICON.cal}<span>La hucha <b>${esc(src.nombre)}</b> se convertirá en una compra a plazos.${srcSaldo?` Los <b class="num">${esc(fmtReal(srcSaldo))}</b> que tenía vuelven a «sin repartir» en ${esc(cartName(hCart(src)).toLowerCase())}, listos para pagar cuotas.`:""}</span></div>` : ""}
+    <div class="field"><label for="f-nom">¿Qué has comprado?</label><input class="inp" id="f-nom" name="nombre" value="${esc(v.nombre)}" placeholder="Ej. iPhone" maxlength="40" ${src?"":"autofocus"}></div>
+    <div class="row2">
+      <div class="field"><label for="f-tot">Precio total</label><div class="money sm"><input class="inp num" id="f-tot" name="total" inputmode="decimal" autocomplete="off" placeholder="0" value="${toInput(v.total)}"><span>€</span></div></div>
+      <div class="field"><label for="f-cuo">Cuota al mes</label><div class="money sm"><input class="inp num" id="f-cuo" name="cuota" inputmode="decimal" autocomplete="off" placeholder="0" value="${toInput(v.cuota)}"><span>€</span></div></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="f-ini">Ya pagado (opcional)</label><div class="money sm"><input class="inp num" id="f-ini" name="pagadoInicial" inputmode="decimal" autocomplete="off" placeholder="0" value="${toInput(v.pagadoInicial)}"><span>€</span></div></div>
+      <div class="field"><label for="f-dia">Día de pago</label><input class="inp num" id="f-dia" name="dia" type="number" inputmode="numeric" min="1" max="28" value="${v.dia||1}"></div>
+    </div>
+    <div class="field"><span class="fl">Se paga desde</span>${cartSeg("cartera", v.cartera==="efectivo"?"efectivo":"tarjeta")}</div>
+    <div class="field"><label for="f-fini">Primera cuota</label><input class="inp" type="date" id="f-fini" name="inicio" value="${esc(v.inicio||todayISO())}"></div>
+    <div class="plan soft" id="plz-sum"><span>—</span></div>
+    <div class="field"><span class="fl">Color</span>${swatchHTML(v.color|0)}</div>`;
+  const foot = p ? `<button type="button" class="btn btn-danger" id="f-del">Eliminar</button>` : "";
+  const read = f => ({ total:parse(f.total.value), cuota:parse(f.cuota.value), ini:parse(f.pagadoInicial.value), dia:Math.min(28, Math.max(1, parseInt(f.dia.value,10)||1)) });
+  const f = openSheet(p ? "Editar compra a plazos" : (src ? "Convertir en compra a plazos" : "Nueva compra a plazos"), p||src ? "" : "Lleva la cuenta de lo que pagas a meses.", body, f=>{
+    const nombre = f.nombre.value.trim(); if(!nombre) return "!Escribe qué has comprado.";
+    const r = read(f);
+    if(!r.total) return "!Escribe el precio total.";
+    if(!r.cuota) return "!Escribe cuánto pagas cada mes.";
+    if(r.ini >= r.total) return "!Lo ya pagado no puede ser igual o mayor que el precio total.";
+    const pid = p ? p.id : newId();
+    const data = {nombre, total:r.total, cuota:r.cuota, pagadoInicial:r.ini, dia:r.dia, cartera:f.cartera.value==="efectivo"?"efectivo":"tarjeta", inicio:f.inicio.value||todayISO(), color:+f.color.value, creado:p?p.creado:Date.now()};
+    const i = S.plazos.findIndex(x=>x.id===pid); if(i>=0) S.plazos[i] = {id:pid, ...data}; else S.plazos.push({id:pid, ...data});
+    if(src){
+      if(srcSaldo) S.movs.push({id:newId(), tipo:"retirar", huchaId:src.id, importe:srcSaldo, destino:"disponible", categoria:"", fecha:todayISO(), nota:`Convertida en compra a plazos «${nombre}»`, creado:Date.now()});
+      const j = S.huchas.findIndex(x=>x.id===src.id); if(j>=0) S.huchas[j] = {...S.huchas[j], archivada:true};
+    }
+    saveLocal(); render();
+    if(src) return `${nombre} ya es una compra a plazos${srcSaldo?`. ${fmtReal(srcSaldo)} vuelven a sin repartir`:""}`;
+    return p ? "Compra actualizada" : `${nombre} añadida a tus compras a plazos`;
+  }, foot);
+  const upd = ()=>{ const r = read(f); const el = $("#plz-sum");
+    if(!r.total || !r.cuota){ el.innerHTML = `<span>Escribe el precio y la cuota y te diré cuántas cuotas son y cuándo terminas.</span>`; return; }
+    const resta = Math.max(0, r.total - r.ini), n = Math.ceil(resta / r.cuota), st = dateOf(f.inicio.value||todayISO());
+    const end = new Date(st.getFullYear(), st.getMonth() + Math.max(0,n-1), r.dia);
+    el.innerHTML = `${ICON.cal}<span>Te quedan <b class="num">${esc(fmtReal(resta))}</b>: <b>${n} ${n===1?"cuota":"cuotas"}</b> de ${esc(fmtReal(r.cuota))}<small>${n?`Terminas en ${MES[end.getMonth()]} de ${end.getFullYear()}`:""}</small></span>`; };
+  f.addEventListener("input", upd); f.addEventListener("change", upd); upd();
+  wireSwatch(f); wireSegs(f);
+  const d = f.querySelector("#f-del"); if(d) d.addEventListener("click", ()=>{ closeSheet(); const old = {...p}; S.plazos = S.plazos.filter(x=>x.id!==p.id); saveLocal(); render(); toast(`«${old.nombre}» eliminada`, {label:"Deshacer", fn:()=>{ S.plazos.push(old); saveLocal(); render(); }}); });
+}
+function formPagoCuota(id){
+  const p = S.plazos.find(x=>x.id===id); if(!p) return;
+  const k = calc(), i = plazoInfo(p, k);
+  if(!i.resta){ toast("Esta compra ya está pagada."); return; }
+  let cart = p.cartera==="efectivo" ? "efectivo" : "tarjeta";
+  const body = `
+    <div class="hint tip-line">${ICON.cal}<span>Cuota ${i.cuotaN+1} de ${i.cuotasTot}. Te quedan <b class="num">${esc(fmtReal(i.resta))}</b>.</span></div>
+    <div class="field"><label for="f-imp">Importe</label><div class="money"><input class="inp num" id="f-imp" name="importe" inputmode="decimal" autocomplete="off" value="${toInput(Math.min(i.cuota, i.resta))}"><span>€</span></div></div>
+    <div class="field"><span class="fl">¿De dónde sale?</span>${cartSeg("cartera", cart, k)}</div>
+    <div class="row2">
+      <div class="field"><label for="f-fecha">Fecha</label><input class="inp" type="date" id="f-fecha" name="fecha" value="${todayISO()}"></div>
+      <div class="field"><label for="f-nota">Nota (opcional)</label><input class="inp" id="f-nota" name="nota" maxlength="120" value="${esc(`Cuota ${i.cuotaN+1} de ${i.cuotasTot}`)}"></div>
+    </div>`;
+  const f = openSheet(`Pagar cuota · ${p.nombre}`, "", body, f=>{
+    const imp = parse(f.importe.value), c = f.cartera.value==="efectivo" ? "efectivo" : "tarjeta";
+    if(!imp) return "!Escribe cuánto pagas.";
+    if(imp > i.resta) return `!Solo te quedan ${fmtReal(i.resta)} por pagar.`;
+    if(imp > Math.max(0, k.pendC[c])) return `!Solo tienes ${fmtReal(Math.max(0,k.pendC[c]))} sin repartir en ${cartName(c).toLowerCase()}. Mueve dinero o saca de una hucha («Lo devuelvo a sin repartir»).`;
+    S.movs.push({id:newId(), tipo:"cuota", plazoId:p.id, importe:imp, cartera:c, fecha:f.fecha.value||todayISO(), nota:f.nota.value.trim(), creado:Date.now()});
+    saveLocal(); render();
+    if(imp === i.resta){ setTimeout(()=>confetti(170), 300); return `¡Has terminado de pagar ${p.nombre}!`; }
+    return `Cuota de ${fmtReal(imp)} pagada. Te quedan ${fmtReal(i.resta - imp)}`;
+  }, "", {okLabel:"Pagar"});
+  wireSegs(f);
+}
+
 /* ---------- render ---------- */
 function bigHTML(c){
   if(priv) return `•••<small> €</small>`;
@@ -1005,6 +1165,8 @@ function renderVault(k, huchas){
   const ef = cartName("efectivo"), ta = cartName("tarjeta");
   $("#vt-ef").textContent = ef; $("#vt-ta").textContent = ta;
   const owe = k.deben ? `<button type="button" class="stat owe" data-act="ver-pend"><div class="lbl">Te deben</div><div class="v num">${esc(fmt(k.deben))}</div><div class="delta">Ver pendientes →</div></button>` : "";
+  const ps = plazoSummary(k);
+  const debt = ps.n ? `<button type="button" class="stat owe" data-act="ver-plazos"><div class="lbl">Debes a plazos</div><div class="v num">${esc(fmt(ps.debe))}</div><div class="delta">${esc(fmt(ps.mensual))} al mes →</div></button>` : "";
   // Total
   $("#vs-total").innerHTML = `<div><div class="lbl">Tu dinero total</div><div class="big num">${bigHTML(k.total)}</div></div>
     <div class="stats">
@@ -1012,7 +1174,7 @@ function renderVault(k, huchas){
       ${stat(`En ${esc(ta.toLowerCase())}`, esc(fmt(k.totalC.tarjeta)), "cart-st", `<div class="delta"><span class="sw-dot ta"></span>${k.cuentas?`${esc(fmt(k.cuentas))} en cuentas`:"Huchas y cuentas"}</div>`)}
       ${stat(`Cobrado en ${esc(k.monthName)}`, esc(fmt(k.mes)), "", deltaHTML(k))}
       ${stat(`Cobrado en ${k.year}`, esc(fmt(k.ano)))}
-      ${owe}
+      ${owe}${debt}
     </div>
     ${barParts([{n:ef, c:"#FFD487", v:Math.max(0,k.totalC.efectivo)},{n:ta, c:"#9FD8FF", v:Math.max(0,k.totalC.tarjeta)}], "Cuando añadas cobros, aquí verás cuánto tienes en efectivo y cuánto en tarjeta.")}`;
   // Por cartera
@@ -1026,6 +1188,7 @@ function renderVault(k, huchas){
         ${stat("Sin repartir", esc(fmt(k.pendC[c])), "pend")}
         ${stat("En huchas", esc(fmt(k.huchasC[c])))}
         ${extra}
+        ${ps.byCart[c] ? stat("Cuotas al mes", esc(fmt(ps.byCart[c])), "", `<div class="delta">Compras a plazos</div>`) : ""}
       </div>
       ${barParts(parts, c==="tarjeta" ? "Apunta cobros que recibes en el banco y repártelos en huchas o cuentas de ahorro." : "Apunta cobros en efectivo y repártelos en tus huchas.")}`;
   }
@@ -1079,7 +1242,7 @@ function renderCuentas(k, huchas){
 }
 function render(){
   const k = calc();
-  const huchas = sorted(S.huchas), empresas = sorted(S.empresas);
+  const huchas = sorted(activeH()), empresas = sorted(S.empresas);
   $("#today").textContent = new Date().toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
   const st = $("#status"); st.className="status"; st.querySelector("span").textContent="Guardado en este dispositivo";
   const eye = $("#btn-eye"); eye.innerHTML = priv ? ICON.eyeOff : ICON.eye; eye.setAttribute("aria-pressed", String(priv)); eye.setAttribute("aria-label", priv ? "Mostrar importes" : "Ocultar importes"); eye.title = priv ? "Mostrar importes" : "Ocultar importes";
@@ -1088,6 +1251,7 @@ function render(){
   renderJars(k, huchas);
   checkCelebrations(huchas.filter(h=>!isCuenta(h)), k);
   renderCuentas(k, huchas);
+  renderPlazos(k);
 
   // empresas
   $("#emps").innerHTML = empresas.length ? empresas.map(e=>{
@@ -1202,12 +1366,12 @@ function renderGastos(){
   const box = $("#gastos");
   const cur = ymNow(), y = cur.slice(0,4);
   document.querySelectorAll("#gas-seg button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.g===gastoPer)));
-  const items = S.movs.filter(m=>m.tipo==="retirar" && m.destino!=="disponible" && (gastoPer==="mes" ? ymOf(m.fecha)===cur : ymOf(m.fecha).startsWith(y)));
+  const items = S.movs.filter(m=>((m.tipo==="retirar" && m.destino!=="disponible") || m.tipo==="cuota") && (gastoPer==="mes" ? ymOf(m.fecha)===cur : ymOf(m.fecha).startsWith(y)));
   const by = {}; let total = 0;
-  for(const m of items){ const c = catOf(m.categoria) ? m.categoria : "_none"; by[c]=(by[c]||0)+(m.importe|0); total+=m.importe|0; }
+  for(const m of items){ const c = m.tipo==="cuota" ? "_plazos" : (catOf(m.categoria) ? m.categoria : "_none"); by[c]=(by[c]||0)+(m.importe|0); total+=m.importe|0; }
   const label = gastoPer==="mes" ? MES[Number(cur.slice(5))-1] : y;
   if(!total){ box.innerHTML = `<div class="empty"><strong>Sin gastos en ${esc(label)}</strong><span>Cuando saques dinero de una hucha y elijas en qué lo gastas, aquí verás a dónde se va.</span></div>`; return; }
-  const rows = Object.entries(by).map(([id,v])=>{ const c = catOf(id); return {id, n: c?c.nombre:"Sin categoría", col: c?color(c.color):"var(--faint)", v}; }).sort((a,b)=>b.v-a.v);
+  const rows = Object.entries(by).map(([id,v])=>{ const c = catOf(id); return {id, n: id==="_plazos" ? "Compras a plazos" : (c?c.nombre:"Sin categoría"), col: id==="_plazos" ? "var(--c1)" : (c?color(c.color):"var(--faint)"), v}; }).sort((a,b)=>b.v-a.v);
   box.innerHTML = `<div class="gas-h"><div><div class="eyebrow">Gastado en ${esc(label)}</div><div class="gas-total num">${esc(fmt(total))}</div></div><span class="hint">${items.length} ${items.length===1?"gasto":"gastos"}</span></div>
     <div class="gbar" role="img" aria-label="Gastos por categoría">${rows.map(r=>`<span title="${esc(r.n)}: ${esc(fmt(r.v))}" style="flex-grow:${r.v};background:${r.col}"></span>`).join("")}</div>
     <div class="grs">${rows.map(r=>`<div class="gr"><i style="background:${r.col}"></i><span>${esc(r.n)}</span><b class="num">${esc(fmt(r.v))}</b><em class="num">${Math.round(r.v/total*100)}%</em></div>`).join("")}</div>`;
@@ -1234,6 +1398,7 @@ function movView(m){
   }
   if(m.tipo==="asignar") return {c:h?color(h.color):"var(--faint)", ic:isCuenta(h)?ICON.bank:ICON.jar, t:`${isCuenta(h)?"A la cuenta":"A la hucha"} ${h?h.nombre:"borrada"}`, s:m.nota||`Desde sin repartir · ${cartName(hCart(h))}`, a:fmt(m.importe), cls:"mid"};
   if(m.tipo==="traspaso"){ const de = m.de==="tarjeta"?"tarjeta":"efectivo"; return {c:"var(--c6)", ic:ICON.swap, t:`${cartName(de)} → ${cartName(otherCart(de))}`, s:m.nota||(de==="tarjeta"?"Sacado del cajero":"Ingresado en el banco"), a:fmt(m.importe), cls:"mid"}; }
+  if(m.tipo==="cuota"){ const p = S.plazos.find(z=>z.id===m.plazoId); return {c:p?color(p.color):"var(--faint)", ic:ICON.cal, t:`Cuota de ${p?p.nombre:"compra borrada"}`, s:[m.nota, cartName(mvCart(m))].filter(Boolean).join(" · "), a:"−"+fmt(m.importe), cls:"out"}; }
   if(m.tipo==="interes") return {c:h?color(h.color):"var(--faint)", ic:ICON.pct, t:`Intereses de ${h?h.nombre:"cuenta borrada"}`, s:m.nota||"", a:"+"+fmt(m.importe), cls:"in"};
   const back = m.destino==="disponible", cat = catOf(m.categoria);
   return {c:h?color(h.color):"var(--faint)", ic:ICON.out, t:`Sacado de ${h?h.nombre:"hucha borrada"}`, s:[back?"Vuelve a sin repartir":(cat?cat.nombre:"Gastado"), m.nota].filter(Boolean).join(" · "), a:(back?"":"−")+fmt(m.importe), cls:back?"mid":"out", cat: !back && cat ? cat : null};
@@ -1301,7 +1466,7 @@ function put(col, id, data){
 }
 function del(col, id){ S[col]=S[col].filter(x=>x.id!==id); saveLocal(); render(); }
 
-function backupData(){ return {app:"hucha-marc", version:2, exportado:todayISO(), perfil, empresas:S.empresas, huchas:S.huchas, movs:S.movs, reglas:S.reglas}; }
+function backupData(){ return {app:"hucha-marc", version:2, exportado:todayISO(), perfil, empresas:S.empresas, huchas:S.huchas, movs:S.movs, reglas:S.reglas, plazos:S.plazos}; }
 function validBackup(d){ return d && typeof d==="object" && CORE.every(c=>Array.isArray(d[c]) && d[c].every(r=>r && typeof r.id==="string")) && (d.reglas==null || Array.isArray(d.reglas)); }
 function formBackup(){
   const body = `
@@ -1315,6 +1480,7 @@ function formBackup(){
     if(!pending) return "!Elige primero un archivo de copia.";
     CORE.forEach(c=>S[c]=pending[c].map(r=>({...r})));
     S.reglas = Array.isArray(pending.reglas) ? pending.reglas.map(r=>({...r})) : [];
+    S.plazos = Array.isArray(pending.plazos) ? pending.plazos.map(r=>({...r})) : [];
     if(pending.perfil && pending.perfil.nombre) savePerfil({...PDEF, ...(perfil||{}), ...pending.perfil, nombre:String(pending.perfil.nombre).slice(0,24), tema:THEMES[pending.perfil.tema]?pending.perfil.tema:"azul"});
     celebReady=false; saveLocal(); render(); celebReady=true;
     return `Copia cargada: ${pending.movs.length} movimientos`;
@@ -1466,7 +1632,7 @@ function formReglas(){
   });
 }
 function formRegla(id){
-  const r = id ? S.reglas.find(x=>x.id===id) : null; const huchas = sorted(S.huchas);
+  const r = id ? S.reglas.find(x=>x.id===id) : null; const huchas = sorted(activeH()).filter(h=>!isCuenta(h)).concat(sorted(activeH()).filter(isCuenta));
   if(!huchas.length){ toast("Crea primero alguna hucha."); return; }
   const body = `
     <div class="field"><label for="f-nom">Nombre de la regla</label><input class="inp" id="f-nom" name="nombre" maxlength="30" value="${esc(r?r.nombre:"")}" placeholder="Ej. Nómina 50/30/20" autofocus></div>
@@ -1538,7 +1704,7 @@ function formCobro(empId){
     return used ? `Cobro de ${fmtReal(imp)} en ${cartName(cart).toLowerCase()} guardado y ${fmtReal(used)} repartido` : `Cobro de ${fmtReal(imp)} guardado en ${cartName(cart).toLowerCase()}`;
   });
   const draw = ()=>{
-    const hs = sorted(S.huchas).filter(h=>hCart(h)===cart);
+    const hs = sorted(activeH()).filter(h=>hCart(h)===cart);
     $("#split-wrap").innerHTML = hs.length ? splitHTML(hs) : `<div class="split"><div class="hint">No tienes huchas en ${esc(cartName(cart).toLowerCase())}. Puedes crearlas después y repartirlo entonces.</div></div>`;
     split = wireSplit(f, hs, ()=>parse(f.importe.value));
   };
@@ -1570,7 +1736,7 @@ function formRepartir(hid){
     return `${fmtReal(used)} repartido en tus huchas`;
   });
   const draw = ()=>{
-    const hs = sorted(S.huchas).filter(h=>hCart(h)===cart);
+    const hs = sorted(activeH()).filter(h=>hCart(h)===cart);
     const avail = Math.max(0, k.pendC[cart]);
     const pre = hid ? {[hid]: avail} : null;
     $("#split-wrap").innerHTML = `<div class="hint" style="margin-bottom:10px">Tienes <b class="num">${esc(fmtReal(avail))}</b> sin repartir en ${esc(cartName(cart).toLowerCase())}.</div>` +
@@ -1693,6 +1859,16 @@ function formMov(id){
         <div class="field"><label for="f-fecha">Fecha</label><input class="inp" type="date" id="f-fecha" name="fecha" value="${esc(m.fecha)}"></div>
         <div class="field"><label for="f-nota">Nota (opcional)</label><input class="inp" id="f-nota" name="nota" maxlength="120" value="${esc(m.nota||"")}"></div>
       </div>`;
+  } else if(m.tipo==="cuota"){
+    const p = S.plazos.find(z=>z.id===m.plazoId);
+    title = `Editar cuota${p?` · ${p.nombre}`:""}`;
+    body = `
+      <div class="field"><label for="f-imp">Importe</label><div class="money"><input class="inp num" id="f-imp" name="importe" inputmode="decimal" autocomplete="off" value="${toInput(m.importe)}"><span>€</span></div></div>
+      <div class="field"><span class="fl">¿De dónde salió?</span>${cartSeg("cartera", mvCart(m))}</div>
+      <div class="row2">
+        <div class="field"><label for="f-fecha">Fecha</label><input class="inp" type="date" id="f-fecha" name="fecha" value="${esc(m.fecha)}"></div>
+        <div class="field"><label for="f-nota">Nota (opcional)</label><input class="inp" id="f-nota" name="nota" maxlength="120" value="${esc(m.nota||"")}"></div>
+      </div>`;
   } else {
     title = "Editar salida de dinero";
     body = sacarFields(pickItems(huchas, true), m.huchaId, "", m);
@@ -1710,6 +1886,8 @@ function formMov(id){
       if(!f.hucha.value) return "!Elige la hucha o cuenta."; ch.huchaId = f.hucha.value;
     } else if(m.tipo==="traspaso"){
       ch.de = f.de.value;
+    } else if(m.tipo==="cuota"){
+      ch.cartera = f.cartera.value==="efectivo" ? "efectivo" : "tarjeta";
     } else {
       if(!f.hucha.value) return "!Elige la hucha."; ch.huchaId = f.hucha.value; ch.destino = f.destino.value;
       ch.categoria = ch.destino==="disponible" ? "" : f.categoria.value;
@@ -1779,7 +1957,8 @@ function formHucha(id, defCart, asCuenta){
       <div class="field"><label for="f-fecha">Fecha límite (opcional)</label><input class="inp" type="date" id="f-fecha" name="fecha" min="${todayISO()}" value="${esc(h&&h.fecha||"")}"></div>
     </div>
     <div class="hint tip-line">${ICON.clock}<span>Con meta y fecha, la hucha te dirá cuánto meter cada mes para llegar a tiempo.</span></div>
-    <div class="field"><span class="fl">Color</span>${swatchHTML(h?h.color|0:nextColor(pool))}</div>`;
+    <div class="field"><span class="fl">Color</span>${swatchHTML(h?h.color|0:nextColor(pool))}</div>
+    ${h ? `<div class="convert-row">${ICON.cal}<span>¿Es algo que pagas a meses?</span><button type="button" class="link" id="f-toplazo">Convertir en compra a plazos</button></div>` : ""}`;
   const what = cuenta ? "la cuenta" : "la hucha";
   const foot = h ? (saldo>0 ? `<span class="hint">Saca los ${esc(fmt(saldo))} para poder eliminar ${what}.</span>` : `<button type="button" class="btn btn-danger" id="f-del">Eliminar</button>`) : "";
   const f = openSheet(h ? (cuenta?"Editar cuenta de ahorro":"Editar hucha") : (cuenta?"Nueva cuenta de ahorro":"Nueva hucha"), cuenta && !h ? "Dinero en el banco que te da intereses." : "", body, f=>{
@@ -1803,6 +1982,7 @@ function formHucha(id, defCart, asCuenta){
     return h ? "Hucha actualizada" : `Hucha ${nombre} creada en ${cartName(nc).toLowerCase()}`;
   }, foot);
   wireSwatch(f); wireSegs(f);
+  const tp = f.querySelector("#f-toplazo"); if(tp) tp.addEventListener("click", ()=>formPlazo(null, h.id));
   const d = f.querySelector("#f-del"); if(d) d.addEventListener("click", ()=>{ closeSheet(); del("huchas", h.id); toast(cuenta?"Cuenta eliminada":"Hucha eliminada", {label:"Deshacer", fn:()=>put("huchas", h.id, h)}); });
 }
 
@@ -1812,6 +1992,7 @@ function formAyuda(){
   const body = `<div class="help">
     ${sec(ICON.jar, "La idea en 30 segundos", `<p>Tu hucha funciona en tres pasos:</p><ol><li><b>Apuntas lo que cobras</b> en cada empresa.</li><li>Ese dinero queda como <b>Sin repartir</b> (el número amarillo de arriba).</li><li><b>Lo repartes en huchas</b>: cada hucha es un bote con un objetivo (colchón, viajes, coche…).</li></ol><p>El número grande es lo que tienes ahorrado entre todas tus huchas.</p>`, true)}
     ${sec(ICON.cash, "Efectivo, tarjeta y cuentas de ahorro", `<p>Arriba ves <b>tu dinero total</b>. <b>Desliza</b> el bloque de color (o toca las pestañas) para ver solo lo que tienes en <b>efectivo</b> o en <b>tarjeta</b>; las huchas de debajo cambian contigo.</p><p>Al añadir un cobro eliges <b>dónde lo recibes</b>. Cada hucha está en efectivo o en tarjeta (puedes cambiarla editándola: su dinero se mueve con ella).</p><p>En tarjeta puedes añadir <b>cuentas de ahorro</b> con su <b>TAE</b>: la app calcula cuánto te generan al mes y al año, y con <b>Intereses</b> apuntas lo que te paga el banco. Con <b>Mover</b> pasas dinero entre efectivo y tarjeta, por ejemplo al sacar del cajero.</p><p>Puedes renombrar «Efectivo» y «Tarjeta» en <b>Ajustes</b>.</p>`)}
+    ${sec(ICON.cal, "Compras a plazos", `<p>Para lo que pagas a meses (el móvil, un ordenador…). Pon el <b>precio total</b>, la <b>cuota mensual</b>, el <b>día de pago</b> y si sale de efectivo o de tarjeta. Si ya habías pagado algo, ponlo en «Ya pagado».</p><p>Cada compra muestra una <b>cuenta atrás</b>: lo que te queda, las cuotas que faltan, el próximo pago y cuándo terminas. Te avisa si el pago está cerca o atrasado. Pulsa <b>Pagar cuota</b> y el dinero sale de tu «sin repartir».</p><p>Si tenías una hucha para algo que pagas a plazos, edítala y pulsa <b>Convertir en compra a plazos</b>: su dinero vuelve a «sin repartir», listo para las cuotas. Arriba, en Total, verás cuánto <b>debes</b> y cuánto pagas al mes.</p>`)}
     ${sec(ICON.inc, "Empresas y cobros", `<p>En <b>Empresas</b> añades los sitios donde trabajas, cada uno con su color. Pulsa <b>Añadir cobro</b> (o el <b>+</b> de una empresa) y escribe el importe neto, la fecha y el tipo (nómina, factura…).</p><p>En el mismo paso puedes repartirlo en tus huchas, o dejarlo para más tarde.</p><p>El gráfico <b>Cobros por mes</b> enseña los últimos 6 meses, un color por empresa. Toca una barra para ver el detalle.</p>`)}
     ${sec(ICON.clock, "Facturas pendientes de cobro", `<p>Si emites una factura y aún no te han pagado, al añadir el cobro elige <b>Pendiente de cobro</b>. Arriba verás <b>Te deben</b> con el total.</p><p>Cuando te paguen, pulsa <b>Cobrado</b> en ese movimiento: pasa a tu dinero sin repartir y podrás repartirlo.</p>`)}
     ${sec(ICON.rule, "Repartir y reglas de reparto", `<p>Al repartir escribes cuánto va a cada hucha. Tienes atajos: <b>A partes iguales</b> y <b>Vaciar</b>.</p><p>Si siempre repartes igual, crea una <b>regla</b> en <b>Tus huchas → Reglas de reparto</b>, por ejemplo 50 % Colchón, 30 % Viajes, 20 % Inversión. Después, al añadir un cobro, toca la regla y se rellenan los importes solos. Lo que no sume 100 % se queda sin repartir.</p>`)}
@@ -1829,6 +2010,7 @@ function showNews(){
   try{ localStorage.setItem(NEWS_KEY, "1"); }catch(e){}
   const it = (ic, c, t, d) => `<li style="--c:var(--${c})"><span class="nic">${ic}</span><div><b>${t}</b><span>${d}</span></div></li>`;
   const body = `<ul class="news">
+    ${it(ICON.cal, "c1", "Compras a plazos", "Lleva la cuenta atrás de lo que pagas a meses (como el móvil) y paga cada cuota con un toque.")}
     ${it(ICON.cash, "c3", "Efectivo y tarjeta", "Arriba ves tu dinero total. Desliza para ver efectivo y tarjeta por separado.")}
     ${it(ICON.bank, "c2", "Cuentas de ahorro", "Añade tus cuentas con su TAE y mira cuánto te generan al mes y al año.")}
     ${it(ICON.swap, "c6", "Mover dinero", "Del banco al bolsillo (cajero) o al revés, con un toque.")}
@@ -1857,6 +2039,10 @@ document.addEventListener("click", e=>{
     case "sacar": formSacar(id); break;
     case "hucha-new": formHucha(null, b.dataset.cart); break;
     case "cuenta-new": formHucha(null, "tarjeta", true); break;
+    case "plazo-new": formPlazo(null); break;
+    case "plazo-edit": formPlazo(id); break;
+    case "plazo-pay": formPagoCuota(id); break;
+    case "ver-plazos": $("#h-plazos").scrollIntoView({behavior:"smooth", block:"start"}); break;
     case "traspaso": formTraspaso(); break;
     case "interes": formInteres(id); break;
     case "hucha-edit": formHucha(id); break;
